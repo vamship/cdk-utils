@@ -11,7 +11,7 @@ const { testValues: _testValues } = require('@vamship/test-utils');
 
 const DirInfo = require('../../src/dir-info');
 
-describe('DirInfo', function() {
+describe('DirInfo', () => {
     function _createInstance(name, parentPath) {
         name = typeof name !== 'string' ? _testValues.getString('name') : name;
         parentPath =

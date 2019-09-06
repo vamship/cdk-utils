@@ -11,7 +11,7 @@ const { testValues: _testValues } = require('@vamship/test-utils');
 
 const ConstructFactory = require('../../src/construct-factory');
 
-describe('ConstructFactory', function() {
+describe('ConstructFactory', () => {
     function _createInstance(id, noOverride) {
         id = id || _testValues.getString('id');
 
