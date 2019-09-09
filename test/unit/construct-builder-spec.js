@@ -22,7 +22,7 @@ const ConstructBuilder = _rewire('../../src/construct-builder');
 const ConstructFactory = require('../../src/construct-factory');
 const DirInfo = require('../../src/dir-info');
 
-describe.only('ConstructBuilder', () => {
+describe('ConstructBuilder', () => {
     function _createInstance(rootPath) {
         rootPath = rootPath || _testValues.getString('rootPath');
 
@@ -511,7 +511,10 @@ describe.only('ConstructBuilder', () => {
                 expect(init).to.have.been.calledWithExactly(scope, directory);
 
                 expect(configure).to.have.been.calledOnce;
-                expect(configure).to.have.been.calledWithExactly(directory);
+                expect(configure).to.have.been.calledWithExactly(
+                    scope,
+                    directory
+                );
             });
         });
     });

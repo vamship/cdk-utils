@@ -107,7 +107,7 @@ class ConstructBuilder {
         );
 
         this._factoryModules.forEach(({ construct, directory }) =>
-            construct.configure(directory)
+            construct.configure(scope, directory)
         );
     }
 }

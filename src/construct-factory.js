@@ -31,11 +31,9 @@ class ConstructFactory {
      * current implementation is a placeholder only, and will throw an error.
      *
      * @protected
+     * @param id {String} The id of the construct.
      * @param scope {Object} The scope to which the newly created construct will
      *        be bound.
-     * @param id {String} The id of the construct.
-     * @param props {Object} A key value pair map of properties to use when
-     *        initializing the construct.
      * @param dirInfo {Object} An object that contains information about the
      *        location of the construct file on the file system. This
      *        information can be used by some constructs (API methods) for
@@ -43,7 +41,7 @@ class ConstructFactory {
      *
      * @returns {Object} Reference to an initialized construct object.
      */
-    _init(scope, id, props, dirInfo) {
+    _init(scope, id, dirInfo) {
         throw new Error('Not implemented (ConstructFactory._init())');
     }
 
@@ -54,14 +52,12 @@ class ConstructFactory {
      *
      * @protected
      * @param construct {Object} Reference to the initialized construct.
-     * @param props {Object} A key value pair map of properties to use when
-     *        initializing the construct.
      * @param dirInfo {Object} An object that contains information about the
      *        location of the construct file on the file system. This
      *        information can be used by some constructs (API methods) for
      *        initialization.
      */
-    _configure(construct, props, dirInfo) {}
+    _configure(construct, dirInfo) {}
 
     /**
      * Invoked to initialize the construct during the initialization pass. This
@@ -69,17 +65,14 @@ class ConstructFactory {
      *
      * @param scope {Object} The scope to which the newly created construct will
      *        be bound.
-     * @param props {Object} A key value pair map of properties to use when
-     *        initializing the construct.
      * @param dirInfo {Object} An object that contains information about the
      *        location of the construct file on the file system. This
      *        information can be used by some constructs (API methods) for
      *        initialization.
      */
-    init(scope, props, dirInfo) {
+    init(scope, dirInfo) {
         _argValidator.checkObject(scope, 'Invalid scope (arg #1)');
-        _argValidator.checkObject(props, 'Invalid props (arg #2)');
-        _argValidator.checkObject(dirInfo, 'Invalid dirInfo (arg #3)');
+        _argValidator.checkObject(dirInfo, 'Invalid dirInfo (arg #2)');
 
         const { stackName } = scope;
 
@@ -89,7 +82,7 @@ class ConstructFactory {
             );
         }
 
-        this._map[stackName] = this._init(scope, this._id, props, dirInfo);
+        this._map[stackName] = this._init(scope, this._id, dirInfo);
     }
 
     /**
@@ -99,17 +92,14 @@ class ConstructFactory {
      *
      * @param scope {Object} The scope to which the newly created construct will
      *        be bound.
-     * @param props {Object} A key value pair map of properties to use when
-     *        initializing the construct.
      * @param dirInfo {Object} An object that contains information about the
      *        location of the construct file on the file system. This
      *        information can be used by some constructs (API methods) for
      *        initialization.
      */
-    configure(scope, props, dirInfo) {
+    configure(scope, dirInfo) {
         _argValidator.checkObject(scope, 'Invalid scope (arg #1)');
-        _argValidator.checkObject(props, 'Invalid props (arg #2)');
-        _argValidator.checkObject(dirInfo, 'Invalid dirInfo (arg #3)');
+        _argValidator.checkObject(dirInfo, 'Invalid dirInfo (arg #2)');
 
         const { stackName } = scope;
 
@@ -120,7 +110,7 @@ class ConstructFactory {
                 `Construct has not been initialized for scope [${stackName}]`
             );
         }
-        this._configure(construct, props, dirInfo);
+        this._configure(construct, dirInfo);
     }
 
     /**

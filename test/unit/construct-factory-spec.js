@@ -85,23 +85,8 @@ describe('ConstructFactory', () => {
 
             inputs.forEach((scope) => {
                 const factory = _createInstance();
-                const props = {};
                 const dirInfo = {};
-                const wrapper = () => factory.init(scope, props, dirInfo);
-
-                expect(wrapper).to.throw(error);
-            });
-        });
-
-        it('should throw an error if invoked without valid props', () => {
-            const inputs = _testValues.allButObject();
-            const error = 'Invalid props (arg #2)';
-
-            inputs.forEach((props) => {
-                const factory = _createInstance();
-                const scope = {};
-                const dirInfo = {};
-                const wrapper = () => factory.init(scope, props, dirInfo);
+                const wrapper = () => factory.init(scope, dirInfo);
 
                 expect(wrapper).to.throw(error);
             });
@@ -109,13 +94,12 @@ describe('ConstructFactory', () => {
 
         it('should throw an error if invoked without valid dirInfo', () => {
             const inputs = _testValues.allButObject();
-            const error = 'Invalid dirInfo (arg #3)';
+            const error = 'Invalid dirInfo (arg #2)';
 
             inputs.forEach((dirInfo) => {
                 const factory = _createInstance();
                 const scope = {};
-                const props = {};
-                const wrapper = () => factory.init(scope, props, dirInfo);
+                const wrapper = () => factory.init(scope, dirInfo);
 
                 expect(wrapper).to.throw(error);
             });
@@ -139,7 +123,6 @@ describe('ConstructFactory', () => {
             const id = _testValues.getString('id');
             const stackName = 'my_stack_1';
             const scope = _createScope(stackName);
-            const props = {};
             const dirInfo = {};
 
             const factory = _createInstance(id);
@@ -147,15 +130,10 @@ describe('ConstructFactory', () => {
 
             expect(initMock).to.not.have.been.called;
 
-            factory.init(scope, props, dirInfo);
+            factory.init(scope, dirInfo);
 
             expect(initMock).to.have.been.calledOnce;
-            expect(initMock).to.have.been.calledWithExactly(
-                scope,
-                id,
-                props,
-                dirInfo
-            );
+            expect(initMock).to.have.been.calledWithExactly(scope, id, dirInfo);
         });
     });
 
@@ -166,23 +144,8 @@ describe('ConstructFactory', () => {
 
             inputs.forEach((scope) => {
                 const factory = _createInstance();
-                const props = {};
                 const dirInfo = {};
-                const wrapper = () => factory.configure(scope, props, dirInfo);
-
-                expect(wrapper).to.throw(error);
-            });
-        });
-
-        it('should throw an error if invoked without valid props', () => {
-            const inputs = _testValues.allButObject();
-            const error = 'Invalid props (arg #2)';
-
-            inputs.forEach((props) => {
-                const factory = _createInstance();
-                const scope = {};
-                const dirInfo = {};
-                const wrapper = () => factory.configure(scope, props, dirInfo);
+                const wrapper = () => factory.configure(scope, dirInfo);
 
                 expect(wrapper).to.throw(error);
             });
@@ -190,13 +153,12 @@ describe('ConstructFactory', () => {
 
         it('should throw an error if invoked without valid dirInfo', () => {
             const inputs = _testValues.allButObject();
-            const error = 'Invalid dirInfo (arg #3)';
+            const error = 'Invalid dirInfo (arg #2)';
 
             inputs.forEach((dirInfo) => {
                 const factory = _createInstance();
                 const scope = {};
-                const props = {};
-                const wrapper = () => factory.configure(scope, props, dirInfo);
+                const wrapper = () => factory.configure(scope, dirInfo);
 
                 expect(wrapper).to.throw(error);
             });
@@ -217,25 +179,23 @@ describe('ConstructFactory', () => {
         it('should invoke the protected configure method on an existing instance', () => {
             const stackName = 'my_stack_1';
             const scope = _createScope(stackName);
-            const props = {};
             const dirInfo = {};
             const construct = {};
 
             const factory = _createInstance();
             factory._init = () => construct;
 
-            factory.init(scope, props, dirInfo);
+            factory.init(scope, dirInfo);
 
             const configureMock = _sinon.stub(factory, '_configure');
 
             expect(configureMock).to.not.have.been.called;
 
-            factory.configure(scope, props, dirInfo);
+            factory.configure(scope, dirInfo);
 
             expect(configureMock).to.have.been.calledOnce;
             expect(configureMock).to.have.been.calledWithExactly(
                 construct,
-                props,
                 dirInfo
             );
         });
