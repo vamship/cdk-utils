@@ -37,7 +37,8 @@
     "dependencies": {
         "@vamship/arg-utils": "^2.4.2",
         "@vamship/error-types": "^1.7.2",
-        "ajv": "^6.10.2"
+        "ajv": "^6.10.2",
+        "bluebird": "^3.5.5"
     },
     "repository": {
         "type": "git",
