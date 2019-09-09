@@ -1,6 +1,7 @@
 'use strict';
 
 const _fs = require('fs');
+const _path = require('path');
 
 const { argValidator: _argValidator } = require('@vamship/arg-utils');
 const { Promise } = require('bluebird');
@@ -60,7 +61,9 @@ class ConstructBuilder {
             } else if (file.isFile()) {
                 if (name.endsWith('.js')) {
                     return {
-                        construct: _loadModule(name),
+                        construct: _loadModule(
+                            _path.resolve(directory.absPath, name)
+                        ),
                         directory
                     };
                 }
@@ -82,9 +85,12 @@ class ConstructBuilder {
      *          outcome of the load operation.
      */
     async load() {
-        this._factoryModules = await ConstructBuilder._loadRecursive(
-            this._rootPath
-        ).filter(({ construct }) => construct instanceof ConstructFactory);
+        const modules = await ConstructBuilder._loadRecursive(
+            new DirInfo(this._rootPath, '')
+        );
+        this._factoryModules = modules.filter(
+            ({ construct }) => construct instanceof ConstructFactory
+        );
     }
 
     /**

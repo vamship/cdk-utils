@@ -7,6 +7,7 @@ const _sinon = require('sinon');
 
 const expect = _chai.expect;
 
+const _path = require('path');
 const { Promise } = require('bluebird');
 const _rewire = require('rewire');
 
@@ -234,8 +235,9 @@ describe('ConstructBuilder', () => {
             expect(_loadModuleStub.callCount).to.equal(fileList.length);
 
             fileList.forEach((file, index) => {
+                const modulePath = _path.resolve(dir.absPath, file);
                 expect(_loadModuleStub.args[index]).to.have.length(1);
-                expect(_loadModuleStub.args[index][0]).to.equal(file);
+                expect(_loadModuleStub.args[index][0]).to.equal(modulePath);
             });
         });
 
@@ -407,7 +409,8 @@ describe('ConstructBuilder', () => {
             builder.load();
 
             expect(_loadRecursiveStub).to.have.been.calledOnce;
-            expect(_loadRecursiveStub.args[0][0]).to.equal(rootPath);
+            expect(_loadRecursiveStub.args[0][0]).to.be.an.instanceof(DirInfo);
+            expect(_loadRecursiveStub.args[0][0].path).to.equal(rootPath);
         });
 
         it('should reject the promise if the recursive load fails', async () => {
