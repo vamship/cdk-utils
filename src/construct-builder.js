@@ -58,15 +58,12 @@ class ConstructBuilder {
                 return await ConstructBuilder._loadRecursive(
                     directory.createChild(name)
                 );
-            } else if (file.isFile()) {
-                if (name.endsWith('.js')) {
-                    return {
-                        construct: _loadModule(
-                            _path.resolve(directory.absPath, name)
-                        ),
-                        directory
-                    };
-                }
+            } else if (file.isFile() && name.endsWith('.js')) {
+                const modulePath = _path.resolve(directory.absPath, name);
+                return {
+                    construct: _loadModule(modulePath),
+                    directory
+                };
             }
         })
             .filter((item) => !!item)
