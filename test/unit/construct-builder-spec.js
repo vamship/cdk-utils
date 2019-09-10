@@ -491,7 +491,7 @@ describe('ConstructBuilder', () => {
             expect(wrapper).to.throw(error);
         });
 
-        it('should initialize and configure all loaded construct factories', () => {
+        it('should initialize and configure all loaded construct factories with default props', () => {
             const builder = _createInstance();
             const scope = _createScope();
             const factoryModules = _createFactoryModules(10);
@@ -511,13 +511,52 @@ describe('ConstructBuilder', () => {
                 const { init, configure, directory } = stubs;
 
                 expect(init).to.have.been.calledOnce;
-                expect(init).to.have.been.calledWithExactly(scope, directory);
+                expect(init.args[0]).to.have.length(3);
+                expect(init.args[0][0]).to.equal(scope);
+                expect(init.args[0][1]).to.equal(directory);
+                expect(init.args[0][2]).to.deep.equal({});
 
                 expect(configure).to.have.been.calledOnce;
-                expect(configure).to.have.been.calledWithExactly(
-                    scope,
+                expect(configure.args[0]).to.have.length(3);
+                expect(configure.args[0][0]).to.equal(scope);
+                expect(configure.args[0][1]).to.equal(directory);
+                expect(configure.args[0][2]).to.deep.equal({});
+            });
+        });
+
+        it('should initialize and configure all loaded construct factories with specified props', () => {
+            const builder = _createInstance();
+            const scope = _createScope();
+            const factoryModules = _createFactoryModules(10);
+
+            builder._factoryModules = factoryModules;
+            const stubs = builder._factoryModules.map(
+                ({ construct, directory }) => ({
+                    init: _sinon.stub(construct, 'init'),
+                    configure: _sinon.stub(construct, 'configure'),
                     directory
-                );
+                })
+            );
+
+            const props = {
+                foo: _testValues.getString('foo')
+            };
+            builder.build(scope, props);
+
+            stubs.forEach((stubs, index) => {
+                const { init, configure, directory } = stubs;
+
+                expect(init).to.have.been.calledOnce;
+                expect(init.args[0]).to.have.length(3);
+                expect(init.args[0][0]).to.equal(scope);
+                expect(init.args[0][1]).to.equal(directory);
+                expect(init.args[0][2]).to.deep.equal(props);
+
+                expect(configure).to.have.been.calledOnce;
+                expect(configure.args[0]).to.have.length(3);
+                expect(configure.args[0][0]).to.equal(scope);
+                expect(configure.args[0][1]).to.equal(directory);
+                expect(configure.args[0][2]).to.deep.equal(props);
             });
         });
     });

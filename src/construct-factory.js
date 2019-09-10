@@ -17,7 +17,7 @@ const { argValidator: _argValidator } = require('@vamship/arg-utils');
  */
 class ConstructFactory {
     /**
-     * @param id {String} The id of the construct represented by this factory.
+     * @param {String} id The id of the construct represented by this factory.
      */
     constructor(id) {
         _argValidator.checkString(id, 1, 'Invalid id (arg #1)');
@@ -31,17 +31,19 @@ class ConstructFactory {
      * current implementation is a placeholder only, and will throw an error.
      *
      * @protected
-     * @param id {String} The id of the construct.
-     * @param scope {Object} The scope to which the newly created construct will
+     * @param {Object} scope The scope to which the newly created construct will
      *        be bound.
-     * @param dirInfo {Object} An object that contains information about the
+     * @param {String} id The id of the construct.
+     * @param {Object} dirInfo An object that contains information about the
      *        location of the construct file on the file system. This
      *        information can be used by some constructs (API methods) for
      *        initialization.
+     * @param {Object} props An optional collection of properties that can be
+     *        used to initialize the construct.
      *
      * @returns {Object} Reference to an initialized construct object.
      */
-    _init(scope, id, dirInfo) {
+    _init(scope, id, dirInfo, props) {
         throw new Error('Not implemented (ConstructFactory._init())');
     }
 
@@ -51,28 +53,33 @@ class ConstructFactory {
      * current implementation is a placeholder that does nothing.
      *
      * @protected
-     * @param construct {Object} Reference to the initialized construct.
-     * @param dirInfo {Object} An object that contains information about the
+     * @param {Object} construct Reference to the initialized construct.
+     * @param {Object} dirInfo An object that contains information about the
      *        location of the construct file on the file system. This
      *        information can be used by some constructs (API methods) for
      *        initialization.
+     * @param {Object} props An optional collection of properties that can be
+     *        used to configure the construct.
      */
-    _configure(construct, dirInfo) {}
+    _configure(construct, dirInfo, props) {}
 
     /**
      * Invoked to initialize the construct during the initialization pass. This
      * method delegates actual initialization to an abstract protected method.
      *
-     * @param scope {Object} The scope to which the newly created construct will
+     * @param {Object} scope The scope to which the newly created construct will
      *        be bound.
-     * @param dirInfo {Object} An object that contains information about the
+     * @param {Object} dirInfo An object that contains information about the
      *        location of the construct file on the file system. This
      *        information can be used by some constructs (API methods) for
      *        initialization.
+     * @param {Object} props An optional collection of properties that can be
+     *        used to initialize the construct.
      */
-    init(scope, dirInfo) {
+    init(scope, dirInfo, props) {
         _argValidator.checkObject(scope, 'Invalid scope (arg #1)');
         _argValidator.checkObject(dirInfo, 'Invalid dirInfo (arg #2)');
+        _argValidator.checkObject(props, 'Invalid props (arg #3)');
 
         const { stackName } = scope;
 
@@ -82,7 +89,7 @@ class ConstructFactory {
             );
         }
 
-        this._map[stackName] = this._init(scope, this._id, dirInfo);
+        this._map[stackName] = this._init(scope, this._id, dirInfo, props);
     }
 
     /**
@@ -90,16 +97,19 @@ class ConstructFactory {
      * configuration pass. This method delegates actual configuration to a
      * protected abstract method.
      *
-     * @param scope {Object} The scope to which the newly created construct will
+     * @param {Object} scope The scope to which the newly created construct will
      *        be bound.
-     * @param dirInfo {Object} An object that contains information about the
+     * @param {Object} dirInfo An object that contains information about the
      *        location of the construct file on the file system. This
      *        information can be used by some constructs (API methods) for
      *        initialization.
+     * @param {Object} props An optional collection of properties that can be
+     *        used to configure the construct.
      */
-    configure(scope, dirInfo) {
+    configure(scope, dirInfo, props) {
         _argValidator.checkObject(scope, 'Invalid scope (arg #1)');
         _argValidator.checkObject(dirInfo, 'Invalid dirInfo (arg #2)');
+        _argValidator.checkObject(props, 'Invalid props (arg #3)');
 
         const { stackName } = scope;
 
@@ -110,13 +120,13 @@ class ConstructFactory {
                 `Construct has not been initialized for scope [${stackName}]`
             );
         }
-        this._configure(construct, dirInfo);
+        this._configure(construct, dirInfo, props);
     }
 
     /**
      * Returns an instance of the construct for the specified scope.
      *
-     * @param scope {Object} The scope to which the newly created construct will
+     * @param {Object} scope The scope to which the newly created construct will
      *        be bound.
      *
      * @returns {Object} Reference to the construct object.

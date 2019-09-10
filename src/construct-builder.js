@@ -96,9 +96,13 @@ class ConstructBuilder {
      *
      * @param {Object} scope The scope to which each of the constructs will be
      *        bound.
+     * @param {Object} [props] An optional collection of properties that will be
+     *        passed down to the init/config operations.
      */
-    build(scope) {
+    build(scope, props) {
         _argValidator.checkObject(scope, 'Invalid scope (arg #1)');
+        props = Object.assign({}, props);
+
         if (!this._factoryModules) {
             throw new Error(
                 'Cannot build constructs. Factory modules have not been loaded'
@@ -106,11 +110,11 @@ class ConstructBuilder {
         }
 
         this._factoryModules.forEach(({ construct, directory }) =>
-            construct.init(scope, directory)
+            construct.init(scope, directory, props)
         );
 
         this._factoryModules.forEach(({ construct, directory }) =>
-            construct.configure(scope, directory)
+            construct.configure(scope, directory, props)
         );
     }
 }
