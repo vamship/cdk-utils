@@ -235,6 +235,7 @@ describe('ConstructFactory', () => {
             expect(configureMock).to.have.been.calledOnce;
             expect(configureMock).to.have.been.calledWithExactly(
                 construct,
+                scope,
                 dirInfo,
                 props
             );

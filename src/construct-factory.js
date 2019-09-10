@@ -54,6 +54,7 @@ class ConstructFactory {
      *
      * @protected
      * @param {Object} construct Reference to the initialized construct.
+     * @param {Object} scope The scope to which construct is bound.
      * @param {Object} dirInfo An object that contains information about the
      *        location of the construct file on the file system. This
      *        information can be used by some constructs (API methods) for
@@ -61,7 +62,7 @@ class ConstructFactory {
      * @param {Object} props An optional collection of properties that can be
      *        used to configure the construct.
      */
-    _configure(construct, dirInfo, props) {}
+    _configure(construct, scope, dirInfo, props) {}
 
     /**
      * Invoked to initialize the construct during the initialization pass. This
@@ -97,8 +98,8 @@ class ConstructFactory {
      * configuration pass. This method delegates actual configuration to a
      * protected abstract method.
      *
-     * @param {Object} scope The scope to which the newly created construct will
-     *        be bound.
+     * @param {Object} scope The scope to which construct that is being
+     *        configured will be bound.
      * @param {Object} dirInfo An object that contains information about the
      *        location of the construct file on the file system. This
      *        information can be used by some constructs (API methods) for
@@ -120,7 +121,7 @@ class ConstructFactory {
                 `Construct has not been initialized for scope [${stackName}]`
             );
         }
-        this._configure(construct, dirInfo, props);
+        this._configure(construct, scope, dirInfo, props);
     }
 
     /**
