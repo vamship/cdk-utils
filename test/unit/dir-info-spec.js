@@ -10,60 +10,37 @@ const _path = require('path');
 const { testValues: _testValues } = require('@vamship/test-utils');
 
 const DirInfo = require('../../src/dir-info');
+const SEP = _path.sep;
 
 describe('DirInfo', () => {
-    function _createInstance(name, parentPath) {
-        name = typeof name !== 'string' ? _testValues.getString('name') : name;
-        parentPath =
-            typeof parentPath !== 'string' ? _createPath() : parentPath;
+    function _createInstance(path) {
+        path = typeof path !== 'string' ? _testValues.getString('path') : path;
 
-        const dirInfo = new DirInfo(name, parentPath);
+        const dirInfo = new DirInfo(path);
 
         return dirInfo;
     }
 
-    function _createPath(depth) {
-        depth = depth >= 0 ? depth : 3;
-
-        return new Array(depth)
-            .fill(0)
-            .map((item, index) => _testValues.getString(`path_${index}`))
-            .join(_path.sep);
-    }
-
     describe('ctor()', () => {
-        it('should throw an error if invoked without a valid name', () => {
+        it('should throw an error if invoked without a valid path', () => {
             const input = _testValues.allButString('');
-            const error = 'Invalid name (arg #1)';
+            const error = 'Invalid path (arg #1)';
 
-            input.forEach((name) => {
-                const parentPath = _createPath();
-                const wrapper = () => new DirInfo(name, parentPath);
-
-                expect(wrapper).to.throw(error);
-            });
-        });
-
-        it('should throw an error if invoked without a valid parentPath', () => {
-            const input = _testValues.allButString();
-            const error = 'Invalid parentPath (arg #2)';
-
-            input.forEach((parentPath) => {
-                const name = _testValues.getString('name');
-                const wrapper = () => new DirInfo(name, parentPath);
+            input.forEach((path) => {
+                const wrapper = () => new DirInfo(path);
 
                 expect(wrapper).to.throw(error);
             });
         });
 
         it('should return an object with expected methods and properties', () => {
-            const name = _testValues.getString('name');
-            const parentPath = _createPath();
+            const path = _testValues.getString('path');
 
-            const dirInfo = new DirInfo(name, parentPath);
+            const dirInfo = new DirInfo(path);
 
             expect(dirInfo).to.be.an('object');
-            expect(dirInfo.name).to.equal(name);
+            expect(dirInfo.name).to.be.a('string');
+            expect(dirInfo.parentPath).to.be.a('string');
             expect(dirInfo.path).to.be.a('string');
             expect(dirInfo.absPath).to.be.a('string');
             expect(dirInfo.getApiRoutePath).to.be.a('function');
@@ -71,58 +48,137 @@ describe('DirInfo', () => {
         });
     });
 
+    describe('[name]', () => {
+        it('should return the input path if the path contained only one token', () => {
+            const path = _testValues.getString('path');
+            const expectedName = path;
+
+            const dirInfo = _createInstance(path);
+            expect(dirInfo.name).to.equal(expectedName);
+        });
+
+        it('should return the the last token if the path contained more than one token', () => {
+            const path = `foo${SEP}bar${SEP}target`;
+            const expectedName = 'target';
+
+            const dirInfo = _createInstance(path);
+            expect(dirInfo.name).to.equal(expectedName);
+        });
+
+        it('should use the normalized path to determine the name', () => {
+            const path = `foo${SEP}bar${SEP}..${SEP}target${SEP}chaz${SEP}..`;
+            const expectedName = 'target';
+
+            const dirInfo = _createInstance(path);
+            expect(dirInfo.name).to.equal(expectedName);
+        });
+    });
+
     describe('[path]', () => {
-        it('should return just the directory path if initialized with an empty parent', () => {
-            const parentPath = '';
-            const name = _testValues.getString('name');
-            const expectedPath = name;
+        it('should return the input path if the input path has already been normalized', () => {
+            const path = `foo${SEP}bar${SEP}target`;
+            const expectedPath = path;
 
-            const dirInfo = _createInstance(name, parentPath);
+            const dirInfo = _createInstance(path);
             expect(dirInfo.path).to.equal(expectedPath);
         });
 
-        it('should return just the directory path if initialized at the root level', () => {
-            const parentPath = _path.sep;
-            const name = _testValues.getString('name');
-            const expectedPath = name;
+        it('should return the normalized path if the input path has not been normalized', () => {
+            const path = `foo${SEP}bar${SEP}..${SEP}target${SEP}chaz${SEP}..`;
+            const expectedPath = `foo${SEP}target`;
 
-            const dirInfo = _createInstance(name, parentPath);
+            const dirInfo = _createInstance(path);
             expect(dirInfo.path).to.equal(expectedPath);
         });
 
-        it('should strip trailing slashes from the name', () => {
-            const parentPath = _path.sep;
-            const name = `${_testValues.getString('name')}${_path.sep}`;
-            const expectedPath = `${name}`;
+        it('should return an absolute path if the input path is an absolute path', () => {
+            const path = `${SEP}foo${SEP}bar${SEP}target`;
+            const expectedPath = path;
 
-            const dirInfo = _createInstance(name, parentPath);
+            const dirInfo = _createInstance(path);
             expect(dirInfo.path).to.equal(expectedPath);
         });
 
-        it('should return the relative path of the directory', () => {
-            const parentPath = _createPath();
-            const name = _testValues.getString('name');
-            const expectedPath = _path.join(parentPath, name);
+        it('should return an absolute normalized path if the input path is an absolute non normalized path', () => {
+            const path = `${SEP}foo${SEP}bar${SEP}..${SEP}target${SEP}chaz${SEP}..`;
+            const expectedPath = `${SEP}foo${SEP}target`;
 
-            const dirInfo = _createInstance(name, parentPath);
+            const dirInfo = _createInstance(path);
             expect(dirInfo.path).to.equal(expectedPath);
         });
     });
 
     describe('[absPath]', () => {
-        it('should return the absolute path of the directory', () => {
-            const parentPath = _createPath();
-            const name = _testValues.getString('name');
-            const expectedPath = _path.resolve(parentPath, name);
+        it('should return the absolute path of the directory if the input is an absolute path', () => {
+            const path = `${SEP}foo${SEP}bar${SEP}target`;
+            const expectedPath = path;
 
-            const dirInfo = _createInstance(name, parentPath);
+            const dirInfo = _createInstance(path);
             expect(dirInfo.absPath).to.equal(expectedPath);
+        });
+
+        it('should resolve the path to an absolute path if the input is a realtive path', () => {
+            const path = `foo${SEP}bar${SEP}target`;
+            const expectedPath = _path.resolve(path);
+
+            const dirInfo = _createInstance(path);
+            expect(dirInfo.absPath).to.equal(expectedPath);
+        });
+
+        it('should return a normalized path if the input is an absolute but non normalized path', () => {
+            const path = `${SEP}foo${SEP}bar${SEP}..${SEP}target${SEP}chaz${SEP}..`;
+            const expectedPath = `${SEP}foo${SEP}target`;
+
+            const dirInfo = _createInstance(path);
+            expect(dirInfo.absPath).to.equal(expectedPath);
+        });
+
+        it('should return a normalized path if the input is a relative but non normalized path', () => {
+            const path = `foo${SEP}bar${SEP}..${SEP}target${SEP}chaz${SEP}..`;
+            const expectedPath = _path.resolve(`foo${SEP}target`);
+
+            const dirInfo = _createInstance(path);
+            expect(dirInfo.absPath).to.equal(expectedPath);
+        });
+    });
+
+    describe('[parentPath]', () => {
+        it('should return the absolute parent path if the input is an absolute path', () => {
+            const path = `${SEP}foo${SEP}bar${SEP}target`;
+            const expectedPath = `${SEP}foo${SEP}bar`;
+
+            const dirInfo = _createInstance(path);
+            expect(dirInfo.parentPath).to.equal(expectedPath);
+        });
+
+        it('should resolve the path to an absolute path if the input is a realtive path', () => {
+            const path = `foo${SEP}bar${SEP}target`;
+            const expectedPath = _path.resolve(`foo${SEP}bar`);
+
+            const dirInfo = _createInstance(path);
+            expect(dirInfo.parentPath).to.equal(expectedPath);
+        });
+
+        it('should return a normalized path if the input is an absolute but non normalized path', () => {
+            const path = `${SEP}foo${SEP}bar${SEP}..${SEP}target${SEP}chaz${SEP}..`;
+            const expectedPath = `${SEP}foo`;
+
+            const dirInfo = _createInstance(path);
+            expect(dirInfo.parentPath).to.equal(expectedPath);
+        });
+
+        it('should return a normalized path if the input is a relative but non normalized path', () => {
+            const path = `foo${SEP}bar${SEP}..${SEP}target${SEP}chaz${SEP}..`;
+            const expectedPath = _path.resolve('foo');
+
+            const dirInfo = _createInstance(path);
+            expect(dirInfo.parentPath).to.equal(expectedPath);
         });
     });
 
     describe('getApiRoutePath()', () => {
         it('should throw an error if invoked without a valid basePath', () => {
-            const input = _testValues.allButString();
+            const input = _testValues.allButString('');
             const error = 'Invalid basePath (arg #1)';
 
             input.forEach((basePath) => {
@@ -134,12 +190,10 @@ describe('DirInfo', () => {
         });
 
         it('should throw an error if the base path is longer than the directory path', () => {
-            const parentPath = _createPath(4);
-            const basePath = _createPath(5).replace(
-                new RegExp(_path.sep, 'g'),
-                '/'
-            );
-            const dirInfo = _createInstance(undefined, parentPath);
+            const path = `${SEP}foo${SEP}bar${SEP}baz${SEP}target`;
+            const basePath = `${SEP}foo${SEP}bar${SEP}baz${SEP}target${SEP}chaz`;
+
+            const dirInfo = _createInstance(path);
             const error = 'Base has more levels than the directory path';
 
             const wrapper = () => dirInfo.getApiRoutePath(basePath);
@@ -148,12 +202,10 @@ describe('DirInfo', () => {
         });
 
         it('should throw an error if the base path does not completely exist in the directory path', () => {
-            const parentPath = _createPath();
-            const basePath = _createPath().replace(
-                new RegExp(_path.sep, 'g'),
-                '/'
-            );
-            const dirInfo = _createInstance(undefined, parentPath);
+            const path = `${SEP}foo${SEP}bar${SEP}baz${SEP}target`;
+            const basePath = `${SEP}foo${SEP}bar${SEP}chaz${SEP}target`;
+
+            const dirInfo = _createInstance(path);
             const error = 'Base path does not exist in directory path';
 
             const wrapper = () => dirInfo.getApiRoutePath(basePath);
@@ -161,23 +213,38 @@ describe('DirInfo', () => {
             expect(wrapper).to.throw(error);
         });
 
-        it('should return the relative path of the directory if the base path is empty', () => {
-            const name = 'third';
-            const parentPath = 'myapi/first/second';
-            const dirInfo = _createInstance(name, parentPath);
-            const basePath = '';
-            const expectedPath = '/myapi/first/second/third';
+        it('should return the portion of the path that does not include the base path', () => {
+            const path = `${SEP}ignore${SEP}this${SEP}myapi${SEP}foo${SEP}target`;
+            const basePath = `${SEP}ignore${SEP}this`;
+            const dirInfo = _createInstance(path);
+
+            const expectedPath = `${SEP}myapi${SEP}foo${SEP}target`;
 
             const routePath = dirInfo.getApiRoutePath(basePath);
             expect(routePath).to.equal(expectedPath);
         });
 
-        it('should return the portion of the path that does not include the base path', () => {
-            const name = 'third';
-            const parentPath = 'ignore/this/myapi/first/second';
-            const dirInfo = _createInstance(name, parentPath);
-            const basePath = 'ignore/this';
-            const expectedPath = '/myapi/first/second/third';
+        it('should resolve the base path if the base path was not an absolute path', () => {
+            const path = _path.resolve(
+                `ignore${SEP}this${SEP}myapi${SEP}foo${SEP}target`
+            );
+            const basePath = `ignore${SEP}this`;
+            const dirInfo = _createInstance(path);
+
+            const expectedPath = `${SEP}myapi${SEP}foo${SEP}target`;
+
+            const routePath = dirInfo.getApiRoutePath(basePath);
+            expect(routePath).to.equal(expectedPath);
+        });
+
+        it('should normalize the base path if the base path was not normalized', () => {
+            const path = _path.resolve(
+                `ignore${SEP}this${SEP}myapi${SEP}foo${SEP}target`
+            );
+            const basePath = `ignore${SEP}this${SEP}foo${SEP}..`;
+            const dirInfo = _createInstance(path);
+
+            const expectedPath = `${SEP}myapi${SEP}foo${SEP}target`;
 
             const routePath = dirInfo.getApiRoutePath(basePath);
             expect(routePath).to.equal(expectedPath);

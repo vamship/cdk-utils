@@ -11,23 +11,18 @@ const { argValidator: _argValidator } = require('@vamship/arg-utils');
  */
 class DirInfo {
     /**
-     * @param {String} name The name of the directory
-     * @param {String} parentPath Path to the parent directory that contains
-     *        this directory
+     * @param {String} path The path to the directory.
      */
-    constructor(name, parentPath) {
-        _argValidator.checkString(name, 1, 'Invalid name (arg #1)');
-        _argValidator.checkString(parentPath, 0, 'Invalid parentPath (arg #2)');
+    constructor(path) {
+        _argValidator.checkString(path, 1, 'Invalid path (arg #1)');
 
-        this._name = name;
-        parentPath = parentPath.replace(new RegExp(`\\${_path.sep}$`), '');
-        this._pathTokens = parentPath.split(_path.sep);
-        this._dirTokens = this._pathTokens
-            .filter((item) => item !== '')
-            .concat(this._name);
+        const parsedPath = _path.parse(_path.normalize(path));
+        this._name = parsedPath.base;
+        this._path = _path.join(parsedPath.dir, parsedPath.base);
+        this._absPath = _path.resolve(path);
+        this._parentPath = _path.resolve(parsedPath.dir);
 
-        this._path = this._dirTokens.join(_path.sep);
-        this._absPath = _path.resolve.apply(_path, this._dirTokens);
+        this._absPathTokens = this._absPath.split(_path.sep);
     }
 
     /**
@@ -40,10 +35,10 @@ class DirInfo {
     }
 
     /**
-     * Gets the path of the current directory, relative to the root used when
-     * initializing the directory tree.
+     * Gets the normalized path of the current directory. This path may be
+     * relative or absolute depending on how the object was initialized.
      *
-     * @return {String} The path, relative to api root.
+     * @return {String} The normalized path.
      */
     get path() {
         return this._path;
@@ -59,6 +54,15 @@ class DirInfo {
     }
 
     /**
+     * Gets the absolute normalized path of the parent directory.
+     *
+     * @return {String} The normalized path.
+     */
+    get parentPath() {
+        return this._parentPath;
+    }
+
+    /**
      * Gets the path to an API route, formulating the path from the specified
      * base directory.
      *
@@ -69,25 +73,23 @@ class DirInfo {
      * @return {String} The calculated relative path.
      */
     getApiRoutePath(basePath) {
-        _argValidator.checkString(basePath, 0, 'Invalid basePath (arg #1)');
+        _argValidator.checkString(basePath, 1, 'Invalid basePath (arg #1)');
 
-        const basePathTokens = basePath
-            .split('/')
-            .filter((item) => item !== '');
+        const basePathTokens = _path.resolve(basePath).split(_path.sep);
 
-        if (basePathTokens.length > this._pathTokens.length) {
+        if (basePathTokens.length > this._absPathTokens.length) {
             throw new Error('Base has more levels than the directory path');
         }
 
         basePathTokens.forEach((token, index) => {
-            if (token !== this._dirTokens[index]) {
+            if (token !== this._absPathTokens[index]) {
                 throw new Error('Base path does not exist in directory path');
             }
         });
 
         const startIndex = basePathTokens.length;
 
-        return [''].concat(this._dirTokens.slice(startIndex)).join('/');
+        return [''].concat(this._absPathTokens.slice(startIndex)).join('/');
     }
 
     /**
@@ -100,7 +102,7 @@ class DirInfo {
     createChild(name) {
         _argValidator.checkString(name, 1, 'Invalid name (arg #1)');
 
-        return new DirInfo(name, this.path);
+        return new DirInfo(_path.join(this.path, name));
     }
 }
 

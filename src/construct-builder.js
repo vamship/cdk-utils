@@ -83,7 +83,7 @@ class ConstructBuilder {
      */
     async load() {
         const modules = await ConstructBuilder._loadRecursive(
-            new DirInfo(this._rootPath, '')
+            new DirInfo(this._rootPath)
         );
         this._factoryModules = modules.filter(
             ({ construct }) => construct instanceof ConstructFactory
