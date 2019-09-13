@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>Home - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConstructBuilder.html">ConstructBuilder</a><ul class='methods'><li data-type='method'><a href="ConstructBuilder.html#build">build</a></li><li data-type='method'><a href="ConstructBuilder.html#prefetchConstructs">prefetchConstructs</a></li></ul></li><li><a href="ConstructFactory.html">ConstructFactory</a><ul class='methods'><li data-type='method'><a href="ConstructFactory.html#_configure">_configure</a></li><li data-type='method'><a href="ConstructFactory.html#_init">_init</a></li><li data-type='method'><a href="ConstructFactory.html#configure">configure</a></li><li data-type='method'><a href="ConstructFactory.html#getInstance">getInstance</a></li><li data-type='method'><a href="ConstructFactory.html#init">init</a></li></ul></li><li><a href="DirInfo.html">DirInfo</a><ul class='methods'><li data-type='method'><a href="DirInfo.html#createChild">createChild</a></li><li data-type='method'><a href="DirInfo.html#getApiRoutePath">getApiRoutePath</a></li></ul></li></ul>
+</nav>
+
+<div id="main">
+    
+
+    
+
+
+
+    
+
+
+    <section class="package">
+        <h3>@vamship/cdk-utils 0.1.0</h3>		
+    </section>
+
+
+
+
+
+
+
+
+
+    
+
+
+
+    <section class="readme">
+        <article><h1>@vamship/cdk-utils</h1>
+<p><em>A library of utilities that will allow CDK projects to be composed from modular files</em></p>
+<h2>API Documentation</h2>
+<p>API documentation can be found <a href="https://vamship.github.io/cdk-utils">here</a>.</p>
+<h2>Motivation</h2>
+<p><a href="https://docs.aws.amazon.com/cdk/latest/guide/home.html">AWS CDK</a> provides a
+much needed improvement over hand crafted cloud formation scripts, by allowing
+the use of imperative statements to generate a declarative cloudformation
+json/yaml file.</p>
+<p>However, this library is still limited by the fact that all of the cloud
+formation configuration for a stack resides in a single file, which can make the
+file verbose and hard to manage as the size of the stack grows.</p>
+<p>This library attempts to address this limitation by providing a few utilities
+that allow:</p>
+<ul>
+<li>Creation of stacks by loading resources defined within individual files
+instead of cramming multiple resource configurations into a single file.</li>
+<li>The ability to use the organization of resource files on the file system to
+while configuring the resources. For example, resources that represent
+different API routes can be automatically configured based on the path to the
+resource.</li>
+</ul>
+<p>While this project draws its inspiration from the now defunct
+<a href="https://github.com/vamship/grunt-wysknd-aws-cf-generator">wysknd-aws-cf-generator</a>,
+it now leverages the CDK which is supported by AWS.</p>
+<h2>Installation</h2>
+<p>This package can be installed using npm:</p>
+<pre class="prettyprint source lang-js"><code>npm install --save-dev @vamship/cdk-utils
+</code></pre>
+<h2>Usage</h2>
+<p>This library exposes two key components that allow the development of CDK
+resources:</p>
+<ul>
+<li><code>ConstructFactory</code>: This is a class that serves as a lightweight wrapper
+around the initialization and configuration of CDK resources.</li>
+<li><code>ConstructBuilder</code>: This class recursively traverses the file system, and
+loads and initializes all resources found on the file system. Only resources
+of type <code>ConstructFactory</code> are loaded, and all other resources are ignored.</li>
+</ul>
+<h3>Example</h3>
+<h4>File Organization</h4>
+<p>This example assumes the following file structure:</p>
+<pre class="prettyprint source"><code>infra
+├── constructs
+│   ├── functions
+│   │   └── hello-func.js
+│   └── tables
+│       ├── products-table.js
+│       └── users-table.js
+└── index.js
+</code></pre>
+<p>As seen above, the directory structure has a main entry point <code>index.js</code>, and
+a directory structure, where each file defines a single resource. The entrypoint
+defines an instance of the <code>ConstructBuilder</code> class, and uses it to traverse
+the directory structure under <code>constructs</code>. Each resource under <code>constructs</code>
+defines a resource (dynamodb table/lambda function/etc.) which is wrapped inside
+a <code>ConstructFactory</code>.</p>
+<h4>Entrypoint</h4>
+<p>The content of a simple entrypoint file is shown below:</p>
+<pre class="prettyprint source lang-js"><code>#!/usr/bin/env node
+
+const _path = require('path');
+
+const { App } = require('@aws-cdk/core');
+const { ConstructBuilder } = require('@vamship/cdk-utils');
+
+const { Stack } = require('@aws-cdk/core');
+
+// Initialize stacks
+const app = new App();
+const stack1 = new Stack(app, 'my-stack-1');
+const stack2 = new Stack(app, 'my-stack-2');
+
+// Build out stack using resources under the constructs directory
+const rootDir = _path.join(__dirname, 'constructs');
+
+// Initialize builder
+const builder = new ConstructBuilder(rootDir);
+
+// Build out the stacks using custom props if necessary
+builder.build(stack2, { keyName: 'username' });
+builder.build(stack1, { keyName: 'id' });
+</code></pre>
+<blockquote>
+<p>NOTE: The construct builder class exposes a <code>prefetchConstructs()</code> method that
+can be used to asynchronously load modules prior to building. If not invoked,
+the constructs will be loaded synchronously at build time.</p>
+</blockquote>
+<h4>Constructs</h4>
+<p>The contents of the <code>users-table.js</code> file is shown below:</p>
+<pre class="prettyprint source lang-js"><code>'use strict';
+
+const { ConstructFactory } = require('@vamship/cdk-utils');
+const _dynamodb = require('@aws-cdk/aws-dynamodb');
+
+const factory = new ConstructFactory('user-table');
+
+factory._init = (scope, id, dirInfo, props) => {
+    return new _dynamodb.Table(scope, 'UsersTable', {
+        partitionKey: {
+            name: props.keyName,
+            type: _dynamodb.AttributeType.STRING
+        }
+    });
+};
+
+factory._configure = () => {
+    console.log('Configuring user table');
+};
+
+module.exports = factory;
+</code></pre>
+<p>Each resource is initialized by overriding the <code>_init()</code> method, and returning
+the initialized resource.</p>
+<blockquote>
+<p>NOTE: The method to be overridden is <code>_init()</code>, not <code>init()</code>. Getting this
+wrong will cause unexpected problems. Also remember to return the initialized
+construct from within the method</p>
+</blockquote>
+<p>The <code>_configure()</code> method is intended for configuration of the resource after all
+resources have been initialized. This method can be used to set up relationships
+between resources (granting a function permissions on a table, for example).</p>
+<blockquote>
+<p>NOTE: The method to be overridden is <code>_configure()</code>, not <code>configure()</code>.
+Getting this wrong will cause unexpected problems.</p>
+</blockquote>
+<p>The following is an example of the use of the <code>_configure()</code> method to setup
+permissions, in the <code>hello-func.js</code> file:</p>
+<pre class="prettyprint source lang-js"><code>'use strict';
+
+const { ConstructFactory } = require('@vamship/cdk-utils');
+const _lambda = require('@aws-cdk/aws-lambda');
+const _path = require('path');
+
+const userTableConstruct = require('../tables/users-table');
+
+const factory = new ConstructFactory('hello-func');
+
+const handlerPath = _path.resolve(__dirname, '../../../src/');
+console.log(handlerPath);
+
+factory._init = (scope, id, dirInfo, props) => {
+    return new _lambda.Function(scope, id, {
+        runtime: _lambda.Runtime.NODEJS_10_X,
+        handler: 'index.handler',
+        code: _lambda.Code.fromAsset(handlerPath)
+    });
+};
+
+// Here, the parameter &quot;construct&quot; is a reference to the construct created
+// in the _init() method.
+factory._configure = (construct, scope, dirInfo, props) => {
+    // Get a reference to the initialized table construct.
+    const userTable = userTableConstruct.getInstance(scope);
+
+    // Allow the function to access the userTable
+    userTable.grantFullAccess(construct);
+};
+
+module.exports = factory;
+</code></pre>
+<h2>Contributing</h2>
+<p>Before submitting pull requests, please make sure to run through automated
+pre commit tests/linting checks/formatting by running:</p>
+<pre class="prettyprint source lang-js"><code>grunt all
+</code></pre></article>
+    </section>
+
+
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Fri Sep 13 2019 15:24:42 GMT-0400 (Eastern Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>
