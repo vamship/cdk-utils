@@ -729,7 +729,9 @@ describe('ConstructBuilder', () => {
             expect(_loadRecursiveSyncStub).to.have.been.calledOnce;
 
             expect(_loadRecursiveSyncStub).to.have.been.calledOnce;
-            expect(_loadRecursiveSyncStub.args[0][0]).to.be.an.instanceof(DirInfo);
+            expect(_loadRecursiveSyncStub.args[0][0]).to.be.an.instanceof(
+                DirInfo
+            );
             expect(_loadRecursiveSyncStub.args[0][0].path).to.equal(rootPath);
 
             expect(builder._factoryModules).to.deep.equal(expectedFactories);

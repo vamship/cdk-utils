@@ -105,8 +105,8 @@ builder.build(stack1, { keyName: 'id' });
 ```
 
 > NOTE: The construct builder class exposes a `prefetchConstructs()` method that
-  can be used to asynchronously load modules prior to building. If not invoked,
-  the constructs will be loaded synchronously at build time.
+> can be used to asynchronously load modules prior to building. If not invoked,
+> the constructs will be loaded synchronously at build time.
 
 #### Constructs
 
