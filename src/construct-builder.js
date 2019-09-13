@@ -115,14 +115,13 @@ class ConstructBuilder {
 
     /**
      * Recursively traverses the file system and loads all constructs defined
-     * within the tree. The contructs are not initialized or configured.
-     * Initialization and configuration can be performed by using the build()
-     * method.
+     * within the tree. This can be executed as an asynchronous pre-build step
+     * prior to initializing and configuring modules using build().
      *
      * @returns {Promise} A promise that is resolved or rejected based on the
      *          outcome of the load operation.
      */
-    async load() {
+    async prefetchConstructs() {
         const modules = await ConstructBuilder._loadRecursive(
             new DirInfo(this._rootPath)
         );
@@ -145,8 +144,11 @@ class ConstructBuilder {
         props = Object.assign({}, props);
 
         if (!this._factoryModules) {
-            throw new Error(
-                'Cannot build constructs. Factory modules have not been loaded'
+            const modules = ConstructBuilder._loadRecursiveSync(
+                new DirInfo(this._rootPath)
+            );
+            this._factoryModules = modules.filter(
+                ({ construct }) => construct instanceof ConstructFactory
             );
         }
 

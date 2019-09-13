@@ -600,12 +600,12 @@ describe('ConstructBuilder', () => {
             const builder = new ConstructBuilder(rootPath);
 
             expect(builder).to.be.an('object');
-            expect(builder.load).to.be.a('function');
+            expect(builder.prefetchConstructs).to.be.a('function');
             expect(builder.build).to.be.a('function');
         });
     });
 
-    describe('load()', () => {
+    describe('prefetchConstructs()', () => {
         let _loadRecursiveStub;
         let _factoryModules;
 
@@ -626,7 +626,7 @@ describe('ConstructBuilder', () => {
 
             expect(_loadRecursiveStub).to.not.have.been.called;
 
-            builder.load();
+            builder.prefetchConstructs();
 
             expect(_loadRecursiveStub).to.have.been.calledOnce;
             expect(_loadRecursiveStub.args[0][0]).to.be.an.instanceof(DirInfo);
@@ -640,7 +640,7 @@ describe('ConstructBuilder', () => {
 
             _loadRecursiveStub.throws(error);
 
-            const ret = builder.load();
+            const ret = builder.prefetchConstructs();
 
             await expect(ret).to.have.been.rejectedWith(error);
         });
@@ -652,7 +652,7 @@ describe('ConstructBuilder', () => {
 
             _factoryModules = expectedFactories;
 
-            const ret = builder.load();
+            const ret = builder.prefetchConstructs();
 
             await expect(ret).to.have.been.fulfilled;
             expect(builder._factoryModules).to.deep.equal(expectedFactories);
@@ -674,7 +674,7 @@ describe('ConstructBuilder', () => {
                 }))
             );
 
-            const ret = builder.load();
+            const ret = builder.prefetchConstructs();
 
             await expect(ret).to.have.been.fulfilled;
             expect(builder._factoryModules).to.deep.equal(expectedFactories);
@@ -682,6 +682,20 @@ describe('ConstructBuilder', () => {
     });
 
     describe('build()', () => {
+        let _loadRecursiveSyncStub;
+        let _factoryModules;
+
+        beforeEach(() => {
+            _factoryModules = [];
+            _loadRecursiveSyncStub = _sinon
+                .stub(ConstructBuilder, '_loadRecursiveSync')
+                .callsFake(() => _factoryModules);
+        });
+
+        afterEach(() => {
+            _loadRecursiveSyncStub.restore();
+        });
+
         function _createScope(stackName) {
             stackName = stackName || _testValues.getString('stackName');
 
@@ -700,15 +714,39 @@ describe('ConstructBuilder', () => {
             });
         });
 
-        it('should throw an error the modules have not yet been loaded', () => {
-            const builder = _createInstance();
+        it('should invoke the synchronous load method if factory modules have not yet been loaded', () => {
+            const rootPath = _testValues.getString('rootPath');
+            const builder = new ConstructBuilder(rootPath);
             const scope = _createScope();
-            const error =
-                'Cannot build constructs. Factory modules have not been loaded';
+            const expectedFactories = _createFactoryModules(10);
 
-            const wrapper = () => builder.build(scope);
+            _factoryModules = expectedFactories;
 
-            expect(wrapper).to.throw(error);
+            expect(_loadRecursiveSyncStub).to.not.have.been.called;
+
+            builder.build(scope);
+
+            expect(_loadRecursiveSyncStub).to.have.been.calledOnce;
+
+            expect(_loadRecursiveSyncStub).to.have.been.calledOnce;
+            expect(_loadRecursiveSyncStub.args[0][0]).to.be.an.instanceof(DirInfo);
+            expect(_loadRecursiveSyncStub.args[0][0].path).to.equal(rootPath);
+
+            expect(builder._factoryModules).to.deep.equal(expectedFactories);
+        });
+
+        it('should not invoke the synchronous load method if factory modules have already been loaded', () => {
+            const rootPath = _testValues.getString('rootPath');
+            const builder = new ConstructBuilder(rootPath);
+            const scope = _createScope();
+
+            builder._factoryModules = _factoryModules;
+
+            expect(_loadRecursiveSyncStub).to.not.have.been.called;
+
+            builder.build(scope);
+
+            expect(_loadRecursiveSyncStub).to.not.have.been.called;
         });
 
         it('should initialize and configure all loaded construct factories with default props', () => {
