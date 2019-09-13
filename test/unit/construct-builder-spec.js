@@ -55,13 +55,21 @@ describe('ConstructBuilder', () => {
             const readdirMethod = _fsMock.mocks.readdir;
 
             const callback = readdirMethod.stub.args[iteration][2];
-            yield callback(null, _fsMock.__dirData);
+            yield callback(null, _fsMock.__dirData[iteration]);
         }
     );
 
     beforeEach(() => {
-        _fsMock = new ObjectMock().addMock('readdir');
-        _fsMock.__dirData = [];
+        _fsMock = new ObjectMock()
+            .addMock('readdir')
+            .addMock('readdirSync', () => {
+                const data = _fsMock.__dirData[_fsMock.__callIndex];
+                _fsMock.__callIndex++;
+
+                return data;
+            });
+        _fsMock.__callIndex = 0;
+        _fsMock.__dirData = [[]];
 
         ConstructBuilder.__set__('_fs', _fsMock.instance);
 
@@ -71,12 +79,6 @@ describe('ConstructBuilder', () => {
     });
 
     describe('[static]', () => {
-        it('should export the expected static methods', () => {
-            expect(ConstructBuilder._loadRecursive).to.be.a('function');
-        });
-    });
-
-    describe('_loadRecursive()', () => {
         function _createDirInfo(name, path) {
             name = name || _testValues.getString('name');
             path = path || _testValues.getString('path');
@@ -123,242 +125,460 @@ describe('ConstructBuilder', () => {
             return new Array(count).fill(0).map(callback);
         }
 
-        it('should reject the promise if invoked without a valid DirInfo object', async () => {
-            const inputs = _testValues.allButObject({});
-            const error = 'Invalid directory (arg #1)';
-
-            return Promise.map(inputs, (directory) => {
-                const ret = ConstructBuilder._loadRecursive(directory);
-
-                return expect(ret).to.have.been.rejectedWith(error);
-            });
+        it('should export the expected static methods', () => {
+            expect(ConstructBuilder._loadRecursive).to.be.a('function');
+            expect(ConstructBuilder._loadRecursiveSync).to.be.a('function');
         });
 
-        it('should read the contents of the specified directory', async () => {
-            const readdirMethod = _fsMock.mocks.readdir;
-            const dir = _createDirInfo();
+        describe('_loadRecursive()', () => {
+            it('should reject the promise if invoked without a valid DirInfo object', async () => {
+                const inputs = _testValues.allButObject({});
+                const error = 'Invalid directory (arg #1)';
 
-            expect(readdirMethod.stub).to.not.have.been.called;
+                return Promise.map(inputs, (directory) => {
+                    const ret = ConstructBuilder._loadRecursive(directory);
 
-            ConstructBuilder._loadRecursive(dir);
-
-            await _loadRecursiveCtrl.resolveUntil(_loadRecursiveCtrl.READ_DIR);
-
-            expect(readdirMethod.stub).to.have.been.calledOnce;
-            expect(readdirMethod.stub.args[0]).to.have.length(3);
-            expect(readdirMethod.stub.args[0][0]).to.equal(dir.absPath);
-            expect(readdirMethod.stub.args[0][1]).to.deep.equal({
-                withFileTypes: true
-            });
-        });
-
-        it('should reject the promise if the directory read fails', async () => {
-            const readdirMethod = _fsMock.mocks.readdir;
-            const dir = _createDirInfo();
-            const error = 'something went wrong!';
-
-            expect(readdirMethod.stub).to.not.have.been.called;
-
-            const ret = ConstructBuilder._loadRecursive(dir);
-            await _loadRecursiveCtrl.resolveUntil(_loadRecursiveCtrl.READ_DIR);
-
-            const callback = readdirMethod.stub.args[0][2];
-            callback(error);
-
-            await expect(ret).to.be.rejectedWith(error);
-        });
-
-        it('should ignore any entity that is not a file or a directory', async () => {
-            const readdirMethod = _fsMock.mocks.readdir;
-            const dir = _createDirInfo();
-            const fileList = _buildFileList('.js', 5);
-            const dirList = _buildFileList(null, 5);
-
-            _fsMock.__dirData = _createDirList(dirList, fileList).map(
-                (item) => {
-                    return Object.assign(item, {
-                        isDirectory: () => false,
-                        isFile: () => false
-                    });
-                }
-            );
-
-            expect(readdirMethod.stub).to.not.have.been.called;
-            expect(_loadModuleStub).to.not.have.been.called;
-
-            ConstructBuilder._loadRecursive(dir);
-            await _loadRecursiveCtrl.resolveUntil(_loadRecursiveCtrl.END);
-
-            expect(readdirMethod.stub).to.have.been.calledOnce;
-            expect(_loadModuleStub).to.not.have.been.called;
-        });
-
-        it('should ignore any entity that does not have a .js extension', async () => {
-            const readdirMethod = _fsMock.mocks.readdir;
-            const dir = _createDirInfo();
-            const fileList = _buildFileList('java', 5);
-            const dirList = [];
-
-            _fsMock.__dirData = _createDirList(dirList, fileList);
-
-            expect(readdirMethod.stub).to.not.have.been.called;
-            expect(_loadModuleStub).to.not.have.been.called;
-
-            ConstructBuilder._loadRecursive(dir);
-            await _loadRecursiveCtrl.resolveUntil(_loadRecursiveCtrl.END);
-
-            // No recursive calls to readdir because there are no child dirs
-            expect(readdirMethod.stub).to.have.been.calledOnce;
-            expect(_loadModuleStub).to.not.have.been.called;
-        });
-
-        it('should load (require) each entity that has a .js extension', async () => {
-            const readdirMethod = _fsMock.mocks.readdir;
-            const dir = _createDirInfo();
-            const fileList = _buildFileList('js', 5);
-            const dirList = [];
-
-            _fsMock.__dirData = _createDirList(dirList, fileList);
-
-            expect(readdirMethod.stub).to.not.have.been.called;
-            expect(_loadModuleStub).to.not.have.been.called;
-
-            ConstructBuilder._loadRecursive(dir);
-            await _loadRecursiveCtrl
-                .resolveUntil(_loadRecursiveCtrl.END)
-                .then(_asyncHelper.wait(10));
-
-            // No recursive calls to readdir because there are no child dirs
-            expect(readdirMethod.stub).to.have.been.calledOnce;
-
-            expect(_loadModuleStub).to.have.been.called;
-            expect(_loadModuleStub.callCount).to.equal(fileList.length);
-
-            fileList.forEach((file, index) => {
-                const modulePath = _path.resolve(dir.absPath, file);
-                expect(_loadModuleStub.args[index]).to.have.length(1);
-                expect(_loadModuleStub.args[index][0]).to.equal(modulePath);
-            });
-        });
-
-        it('should reject the promise if any of the load operations fails', async () => {
-            const dir = _createDirInfo();
-            const fileList = _buildFileList('js', 5);
-            const dirList = [];
-            const error = new Error('something went wrong!');
-
-            _fsMock.__dirData = _createDirList(dirList, fileList);
-            _loadModuleStub.throws(error);
-
-            const ret = ConstructBuilder._loadRecursive(dir);
-            await _loadRecursiveCtrl.resolveUntil(_loadRecursiveCtrl.END);
-
-            await expect(ret).to.be.rejectedWith(error);
-        });
-
-        it('should recursively load data from every directory in the list', async () => {
-            const dir = _createDirInfo();
-            const fileList = [];
-            const dirList = _buildFileList(undefined, 5);
-
-            _fsMock.__dirData = _createDirList(dirList, fileList);
-
-            ConstructBuilder._loadRecursive(dir);
-            const loadRecursiveStub = _sinon.stub(
-                ConstructBuilder,
-                '_loadRecursive'
-            );
-
-            try {
-                expect(loadRecursiveStub).to.not.have.been.called;
-
-                await _loadRecursiveCtrl.resolveUntil(_loadRecursiveCtrl.END);
-
-                expect(loadRecursiveStub).to.have.been.called;
-                expect(loadRecursiveStub.callCount).to.equal(dirList.length);
-
-                dirList.forEach((dirName, index) => {
-                    const args = loadRecursiveStub.args[index];
-                    const child = dir.createChild(dirName);
-
-                    expect(args).to.have.length(1);
-                    expect(args[0]).to.be.an.instanceof(DirInfo);
-                    expect(args[0].absPath).to.equal(child.absPath);
+                    return expect(ret).to.have.been.rejectedWith(error);
                 });
-            } finally {
-                loadRecursiveStub.restore();
-            }
-        });
-
-        it('should reject the promise if the recursive load call fails', async () => {
-            const dir = _createDirInfo();
-            const fileList = [];
-            const dirList = _buildFileList(undefined, 5);
-            const error = new Error('something went wrong!');
-
-            _fsMock.__dirData = _createDirList(dirList, fileList);
-
-            const ret = ConstructBuilder._loadRecursive(dir);
-            const loadRecursiveStub = _sinon.stub(
-                ConstructBuilder,
-                '_loadRecursive'
-            );
-
-            try {
-                loadRecursiveStub.throws(error);
-
-                await _loadRecursiveCtrl.resolveUntil(_loadRecursiveCtrl.END);
-                await expect(ret).to.be.rejectedWith(error);
-            } finally {
-                loadRecursiveStub.restore();
-            }
-        });
-
-        it('should return a list of initialized modules if the call succeeds', async () => {
-            const generateDirData = (dirCount) => {
-                const jsFileList = _buildFileList('js', 2);
-                const fileList = jsFileList.concat(
-                    _buildFileList(undefined, 2)
-                );
-                const dirList = _buildFileList(undefined, dirCount);
-
-                return _createDirList(dirList, fileList);
-            };
-
-            const initialDirCount = 1;
-            const dir = _createDirInfo();
-            const expectedModules = [];
-
-            _fsMock.__dirData = generateDirData(initialDirCount);
-            let index = 0;
-            _loadModuleStub.callsFake(() => {
-                index++;
-                const construct = new ConstructFactory(`factory-${index}`);
-                expectedModules.push(construct);
-                return construct;
             });
 
-            const ret = ConstructBuilder._loadRecursive(dir);
-            await Promise.mapSeries(
-                new Array(initialDirCount + 1).fill(0),
-                async (item, iteration) => {
-                    if (iteration !== 0) {
-                        _fsMock.__dirData = generateDirData(0);
+            it('should read the contents of the specified directory', async () => {
+                const readdirMethod = _fsMock.mocks.readdir;
+                const dir = _createDirInfo();
+
+                expect(readdirMethod.stub).to.not.have.been.called;
+
+                ConstructBuilder._loadRecursive(dir);
+
+                await _loadRecursiveCtrl.resolveUntil(
+                    _loadRecursiveCtrl.READ_DIR
+                );
+
+                expect(readdirMethod.stub).to.have.been.calledOnce;
+                expect(readdirMethod.stub.args[0]).to.have.length(3);
+                expect(readdirMethod.stub.args[0][0]).to.equal(dir.absPath);
+                expect(readdirMethod.stub.args[0][1]).to.deep.equal({
+                    withFileTypes: true
+                });
+            });
+
+            it('should reject the promise if the directory read fails', async () => {
+                const readdirMethod = _fsMock.mocks.readdir;
+                const dir = _createDirInfo();
+                const error = 'something went wrong!';
+
+                expect(readdirMethod.stub).to.not.have.been.called;
+
+                const ret = ConstructBuilder._loadRecursive(dir);
+                await _loadRecursiveCtrl.resolveUntil(
+                    _loadRecursiveCtrl.READ_DIR
+                );
+
+                const callback = readdirMethod.stub.args[0][2];
+                callback(error);
+
+                await expect(ret).to.be.rejectedWith(error);
+            });
+
+            it('should ignore any entity that is not a file or a directory', async () => {
+                const readdirMethod = _fsMock.mocks.readdir;
+                const dir = _createDirInfo();
+                const fileList = _buildFileList('.js', 5);
+                const dirList = _buildFileList(null, 5);
+
+                _fsMock.__dirData[0] = _createDirList(dirList, fileList).map(
+                    (item) => {
+                        return Object.assign(item, {
+                            isDirectory: () => false,
+                            isFile: () => false
+                        });
                     }
+                );
+
+                expect(readdirMethod.stub).to.not.have.been.called;
+                expect(_loadModuleStub).to.not.have.been.called;
+
+                ConstructBuilder._loadRecursive(dir);
+                await _loadRecursiveCtrl.resolveUntil(_loadRecursiveCtrl.END);
+
+                expect(readdirMethod.stub).to.have.been.calledOnce;
+                expect(_loadModuleStub).to.not.have.been.called;
+            });
+
+            it('should ignore any entity that does not have a .js extension', async () => {
+                const readdirMethod = _fsMock.mocks.readdir;
+                const dir = _createDirInfo();
+                const fileList = _buildFileList('java', 5);
+                const dirList = [];
+
+                _fsMock.__dirData[0] = _createDirList(dirList, fileList);
+
+                expect(readdirMethod.stub).to.not.have.been.called;
+                expect(_loadModuleStub).to.not.have.been.called;
+
+                ConstructBuilder._loadRecursive(dir);
+                await _loadRecursiveCtrl.resolveUntil(_loadRecursiveCtrl.END);
+
+                // No recursive calls to readdir because there are no child dirs
+                expect(readdirMethod.stub).to.have.been.calledOnce;
+                expect(_loadModuleStub).to.not.have.been.called;
+            });
+
+            it('should load (require) each entity that has a .js extension', async () => {
+                const readdirMethod = _fsMock.mocks.readdir;
+                const dir = _createDirInfo();
+                const fileList = _buildFileList('js', 5);
+                const dirList = [];
+
+                _fsMock.__dirData[0] = _createDirList(dirList, fileList);
+
+                expect(readdirMethod.stub).to.not.have.been.called;
+                expect(_loadModuleStub).to.not.have.been.called;
+
+                ConstructBuilder._loadRecursive(dir);
+                await _loadRecursiveCtrl
+                    .resolveUntil(_loadRecursiveCtrl.END)
+                    .then(_asyncHelper.wait(10));
+
+                // No recursive calls to readdir because there are no child dirs
+                expect(readdirMethod.stub).to.have.been.calledOnce;
+
+                expect(_loadModuleStub).to.have.been.called;
+                expect(_loadModuleStub.callCount).to.equal(fileList.length);
+
+                fileList.forEach((file, index) => {
+                    const modulePath = _path.resolve(dir.absPath, file);
+                    expect(_loadModuleStub.args[index]).to.have.length(1);
+                    expect(_loadModuleStub.args[index][0]).to.equal(modulePath);
+                });
+            });
+
+            it('should reject the promise if any of the load operations fails', async () => {
+                const dir = _createDirInfo();
+                const fileList = _buildFileList('js', 5);
+                const dirList = [];
+                const error = new Error('something went wrong!');
+
+                _fsMock.__dirData[0] = _createDirList(dirList, fileList);
+                _loadModuleStub.throws(error);
+
+                const ret = ConstructBuilder._loadRecursive(dir);
+                await _loadRecursiveCtrl.resolveUntil(_loadRecursiveCtrl.END);
+
+                await expect(ret).to.be.rejectedWith(error);
+            });
+
+            it('should recursively load data from every directory in the list', async () => {
+                const dir = _createDirInfo();
+                const fileList = [];
+                const dirList = _buildFileList(undefined, 5);
+
+                _fsMock.__dirData[0] = _createDirList(dirList, fileList);
+
+                ConstructBuilder._loadRecursive(dir);
+                const loadRecursiveStub = _sinon.stub(
+                    ConstructBuilder,
+                    '_loadRecursive'
+                );
+
+                try {
+                    expect(loadRecursiveStub).to.not.have.been.called;
+
+                    await _loadRecursiveCtrl.resolveUntil(
+                        _loadRecursiveCtrl.END
+                    );
+
+                    expect(loadRecursiveStub).to.have.been.called;
+                    expect(loadRecursiveStub.callCount).to.equal(
+                        dirList.length
+                    );
+
+                    dirList.forEach((dirName, index) => {
+                        const args = loadRecursiveStub.args[index];
+                        const child = dir.createChild(dirName);
+
+                        expect(args).to.have.length(1);
+                        expect(args[0]).to.be.an.instanceof(DirInfo);
+                        expect(args[0].absPath).to.equal(child.absPath);
+                    });
+                } finally {
+                    loadRecursiveStub.restore();
+                }
+            });
+
+            it('should reject the promise if the recursive load call fails', async () => {
+                const dir = _createDirInfo();
+                const fileList = [];
+                const dirList = _buildFileList(undefined, 5);
+                const error = new Error('something went wrong!');
+
+                _fsMock.__dirData[0] = _createDirList(dirList, fileList);
+
+                const ret = ConstructBuilder._loadRecursive(dir);
+                const loadRecursiveStub = _sinon.stub(
+                    ConstructBuilder,
+                    '_loadRecursive'
+                );
+
+                try {
+                    loadRecursiveStub.throws(error);
+
+                    await _loadRecursiveCtrl.resolveUntil(
+                        _loadRecursiveCtrl.END
+                    );
+                    await expect(ret).to.be.rejectedWith(error);
+                } finally {
+                    loadRecursiveStub.restore();
+                }
+            });
+
+            it('should return a list of initialized modules if the call succeeds', async () => {
+                const dir = _createDirInfo();
+                const dirTree = [
+                    _createDirList(
+                        ['child_1', 'child_2'],
+                        [
+                            'ignore-01.java',
+                            'ignore-02.java',
+                            'module-01.js',
+                            'module-02.js'
+                        ]
+                    ),
+                    _createDirList(
+                        ['child_11'],
+                        ['ignore-11.cs', 'module-11.js', 'module-12.js']
+                    ),
+                    _createDirList(
+                        [],
+                        ['ignore-21.rs', 'module-21.js', 'module-22.js']
+                    ),
+                    _createDirList(
+                        [],
+                        ['ignore-111.txt', 'module-111.js', 'module-112.js']
+                    )
+                ];
+                _fsMock.__dirData = dirTree;
+
+                const expectedConstructs = [];
+
+                _loadModuleStub.callsFake((path) => {
+                    const construct = new ConstructFactory(path);
+                    expectedConstructs.push(construct);
+                    return construct;
+                });
+
+                const ret = ConstructBuilder._loadRecursive(dir);
+
+                await Promise.mapSeries(dirTree, async (item, iteration) => {
                     await _loadRecursiveCtrl.resolveUntil(
                         _loadRecursiveCtrl.END,
                         iteration
                     );
+                    await _asyncHelper.wait(10)();
+                });
+
+                const modules = await expect(ret).to.have.been.fulfilled;
+                expect(modules).to.have.length(expectedConstructs.length);
+
+                modules.forEach((module, index) => {
+                    expect(module).to.be.an('object');
+                    expect(module.construct).to.be.an.instanceof(
+                        ConstructFactory
+                    );
+                    expect(expectedConstructs).to.deep.include(
+                        module.construct
+                    );
+
+                    expect(module.directory).to.be.an.instanceof(DirInfo);
+                });
+            });
+        });
+
+        describe('_loadRecursiveSync()', () => {
+            it('should throw an error if invoked without a valid DirInfo object', () => {
+                const inputs = _testValues.allButObject({});
+                const error = 'Invalid directory (arg #1)';
+
+                inputs.forEach((directory) => {
+                    const wrapper = () =>
+                        ConstructBuilder._loadRecursiveSync(directory);
+
+                    return expect(wrapper).to.throw(error);
+                });
+            });
+
+            it('should read the contents of the specified directory', () => {
+                const readdirSyncMethod = _fsMock.mocks.readdirSync;
+                const dir = _createDirInfo();
+
+                expect(readdirSyncMethod.stub).to.not.have.been.called;
+
+                ConstructBuilder._loadRecursiveSync(dir);
+
+                expect(readdirSyncMethod.stub).to.have.been.calledOnce;
+                expect(readdirSyncMethod.stub.args[0]).to.have.length(2);
+                expect(readdirSyncMethod.stub.args[0][0]).to.equal(dir.absPath);
+                expect(readdirSyncMethod.stub.args[0][1]).to.deep.equal({
+                    withFileTypes: true
+                });
+            });
+
+            it('should ignore any entity that is not a file or a directory', () => {
+                const readdirSyncMethod = _fsMock.mocks.readdirSync;
+                const dir = _createDirInfo();
+                const fileList = _buildFileList('.js', 5);
+                const dirList = _buildFileList(null, 5);
+
+                _fsMock.__dirData[0] = _createDirList(dirList, fileList).map(
+                    (item) => {
+                        return Object.assign(item, {
+                            isDirectory: () => false,
+                            isFile: () => false
+                        });
+                    }
+                );
+
+                expect(readdirSyncMethod.stub).to.not.have.been.called;
+                expect(_loadModuleStub).to.not.have.been.called;
+
+                ConstructBuilder._loadRecursiveSync(dir);
+
+                expect(readdirSyncMethod.stub).to.have.been.calledOnce;
+                expect(_loadModuleStub).to.not.have.been.called;
+            });
+
+            it('should ignore any entity that does not have a .js extension', () => {
+                const readdirSyncMethod = _fsMock.mocks.readdirSync;
+                const dir = _createDirInfo();
+                const fileList = _buildFileList('java', 5);
+                const dirList = [];
+
+                _fsMock.__dirData[0] = _createDirList(dirList, fileList);
+
+                expect(readdirSyncMethod.stub).to.not.have.been.called;
+                expect(_loadModuleStub).to.not.have.been.called;
+
+                ConstructBuilder._loadRecursiveSync(dir);
+
+                // No recursive calls to readdirSync because there are no child dirs
+                expect(readdirSyncMethod.stub).to.have.been.calledOnce;
+                expect(_loadModuleStub).to.not.have.been.called;
+            });
+
+            it('should load (require) each entity that has a .js extension', () => {
+                const readdirSyncMethod = _fsMock.mocks.readdirSync;
+                const dir = _createDirInfo();
+                const fileList = _buildFileList('js', 5);
+                const dirList = [];
+
+                _fsMock.__dirData[0] = _createDirList(dirList, fileList);
+
+                expect(readdirSyncMethod.stub).to.not.have.been.called;
+                expect(_loadModuleStub).to.not.have.been.called;
+
+                ConstructBuilder._loadRecursiveSync(dir);
+
+                // No recursive calls to readdirSync because there are no child dirs
+                expect(readdirSyncMethod.stub).to.have.been.calledOnce;
+
+                expect(_loadModuleStub).to.have.been.called;
+                expect(_loadModuleStub.callCount).to.equal(fileList.length);
+
+                fileList.forEach((file, index) => {
+                    const modulePath = _path.resolve(dir.absPath, file);
+                    expect(_loadModuleStub.args[index]).to.have.length(1);
+                    expect(_loadModuleStub.args[index][0]).to.equal(modulePath);
+                });
+            });
+
+            it('should recursively load data from every directory in the list', () => {
+                const dir = _createDirInfo();
+                const fileList = [];
+                const dirList = _buildFileList(undefined, 5);
+
+                _fsMock.__dirData[0] = _createDirList(dirList, fileList);
+
+                const loadRecursiveSyncStub = _sinon.stub(
+                    ConstructBuilder,
+                    '_loadRecursiveSync'
+                );
+
+                try {
+                    loadRecursiveSyncStub.callThrough();
+                    dirList.forEach((item, index) => {
+                        loadRecursiveSyncStub.onCall(index + 1).returns(0);
+                    });
+
+                    ConstructBuilder._loadRecursiveSync(dir);
+
+                    expect(loadRecursiveSyncStub).to.have.been.called;
+                    expect(loadRecursiveSyncStub.callCount).to.equal(
+                        dirList.length + 1
+                    );
+
+                    dirList.forEach((dirName, index) => {
+                        const args = loadRecursiveSyncStub.args[index + 1];
+                        const child = dir.createChild(dirName);
+
+                        expect(args).to.have.length(1);
+                        expect(args[0]).to.be.an.instanceof(DirInfo);
+                        expect(args[0].absPath).to.equal(child.absPath);
+                    });
+                } finally {
+                    loadRecursiveSyncStub.restore();
                 }
-            );
+            });
 
-            const modules = await expect(ret).to.have.been.fulfilled;
-            modules.forEach((module) => {
-                expect(module).to.be.an('object');
-                expect(module.construct).to.be.an.instanceof(ConstructFactory);
-                expect(module.directory).to.be.an.instanceof(DirInfo);
+            it('should return a list of initialized modules if the call succeeds', () => {
+                const dir = _createDirInfo();
+                const dirTree = [
+                    _createDirList(
+                        ['child_1', 'child_2'],
+                        [
+                            'ignore-01.java',
+                            'ignore-02.java',
+                            'module-01.js',
+                            'module-02.js'
+                        ]
+                    ),
+                    _createDirList(
+                        ['child_11'],
+                        ['ignore-11.cs', 'module-11.js', 'module-12.js']
+                    ),
+                    _createDirList(
+                        [],
+                        ['ignore-21.rs', 'module-21.js', 'module-22.js']
+                    ),
+                    _createDirList(
+                        [],
+                        ['ignore-111.txt', 'module-111.js', 'module-112.js']
+                    )
+                ];
+                _fsMock.__dirData = dirTree;
 
-                expect(expectedModules).to.deep.include(module.construct);
+                const expectedConstructs = [];
+
+                _loadModuleStub.callsFake((path) => {
+                    const construct = new ConstructFactory(path);
+                    expectedConstructs.push(construct);
+                    return construct;
+                });
+
+                const modules = ConstructBuilder._loadRecursiveSync(dir);
+
+                expect(modules).to.have.length(expectedConstructs.length);
+
+                modules.forEach((module, index) => {
+                    expect(module).to.be.an('object');
+                    expect(module.construct).to.be.an.instanceof(
+                        ConstructFactory
+                    );
+                    expect(expectedConstructs).to.deep.include(
+                        module.construct
+                    );
+
+                    expect(module.directory).to.be.an.instanceof(DirInfo);
+                });
             });
         });
     });

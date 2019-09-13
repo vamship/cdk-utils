@@ -73,6 +73,47 @@ class ConstructBuilder {
     }
 
     /**
+     * Recursively loads constructs from the specified directory, but in a
+     * synchronous manner. This is the synchronous equivalent of the
+     * _loadRecursive() method.
+     *
+     * @static
+     * @private
+     * @param {DirInfo} dirInfo An object representing the directory that is
+     *        currently being traversed.
+     */
+    static _loadRecursiveSync(directory) {
+        _argValidator.checkInstance(
+            directory,
+            DirInfo,
+            'Invalid directory (arg #1)'
+        );
+
+        const files = _fs.readdirSync(directory.absPath, {
+            withFileTypes: true
+        });
+
+        const results = files
+            .map((file) => {
+                const { name } = file;
+                if (file.isDirectory()) {
+                    return ConstructBuilder._loadRecursiveSync(
+                        directory.createChild(name)
+                    );
+                } else if (file.isFile() && name.endsWith('.js')) {
+                    const modulePath = _path.resolve(directory.absPath, name);
+                    return {
+                        construct: _loadModule(modulePath),
+                        directory
+                    };
+                }
+            })
+            .filter((item) => !!item)
+            .reduce((result, modules) => result.concat(modules), []);
+        return results;
+    }
+
+    /**
      * Recursively traverses the file system and loads all constructs defined
      * within the tree. The contructs are not initialized or configured.
      * Initialization and configuration can be performed by using the build()
