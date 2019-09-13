@@ -88,37 +88,25 @@ const { ConstructBuilder } = require('@vamship/cdk-utils');
 
 const { Stack } = require('@aws-cdk/core');
 
-// Main function that builds our the stack.
-async function main() {
-    console.log('Initializing application');
-    const app = new App();
+// Initialize stacks
+const app = new App();
+const stack1 = new Stack(app, 'my-stack-1');
+const stack2 = new Stack(app, 'my-stack-2');
 
-    // Build out stack using resources under the constructs directory
-    const rootDir = _path.join(__dirname, 'constructs');
+// Build out stack using resources under the constructs directory
+const rootDir = _path.join(__dirname, 'constructs');
 
-    console.log('Initializing builder', rootDir);
-    const builder = new ConstructBuilder(rootDir);
+// Initialize builder
+const builder = new ConstructBuilder(rootDir);
 
-    console.log('Loading constructs');
-    await builder.load();
-
-    console.log('Creating stacks');
-    const stack1 = new Stack(app, 'my-stack-1');
-    builder.build(stack1, { keyName: 'id' });
-
-    const stack2 = new Stack(app, 'my-stack-2');
-    builder.build(stack2, { keyName: 'username' });
-}
-
-main()
-    .then(() => {
-        console.log('All done');
-    })
-    .catch((ex) => {
-        console.error('ERROR: Error creating stack');
-        console.error(ex);
-    });
+// Build out the stacks using custom props if necessary
+builder.build(stack2, { keyName: 'username' });
+builder.build(stack1, { keyName: 'id' });
 ```
+
+> NOTE: The construct builder class exposes a `prefetchConstructs()` method that
+  can be used to asynchronously load modules prior to building. If not invoked,
+  the constructs will be loaded synchronously at build time.
 
 #### Constructs
 
