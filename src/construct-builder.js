@@ -10,7 +10,8 @@ const ConstructFactory = require('./construct-factory');
 const DirInfo = require('./dir-info');
 
 function _loadModule(path) {
-    return require(path);
+    const module = require(path);
+    return module.default || module;
 }
 
 /**
