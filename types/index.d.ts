@@ -143,7 +143,7 @@ declare module vamship__cdk_utils {
          * @param {Object} [props] An optional collection of properties that will be
          *        passed down to the init/config operations.
          */
-        public build(scope: Construct, props?: IProps);
+        public build(scope: Construct, props?: IProps): void;
     }
 
     /**
@@ -255,7 +255,7 @@ declare module vamship__cdk_utils {
          *
          * @returns {Object} Reference to the construct object.
          */
-        public getInstance(scope);
+        public getInstance(scope: Construct): Construct;
     }
 }
 
