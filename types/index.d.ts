@@ -159,7 +159,7 @@ declare module vamship__cdk_utils {
      * granting a lambda function access to specific tables - that have been
      * initialized in the first pass.
      */
-    abstract class ConstructFactory {
+    abstract class ConstructFactory<TConstruct extends Construct> {
         /**
          * @param {String} id The id of the construct represented by this factory.
          */
@@ -188,7 +188,7 @@ declare module vamship__cdk_utils {
             id: string,
             dirInfo: DirInfo,
             props?: IProps
-        ): Construct;
+        ): TConstruct;
 
         /**
          * Abstract method that must be overridden by specific construct factories,
@@ -206,7 +206,7 @@ declare module vamship__cdk_utils {
          *        used to configure the construct.
          */
         protected _configure(
-            construct: Construct,
+            construct: TConstruct,
             scope: Construct,
             dirInfo: DirInfo,
             props?: IProps
@@ -242,7 +242,7 @@ declare module vamship__cdk_utils {
          *        used to configure the construct.
          */
         public configure(
-            scope: Construct,
+            scope: TConstruct,
             dirInfo: DirInfo,
             props: IProps
         ): void;
@@ -255,7 +255,7 @@ declare module vamship__cdk_utils {
          *
          * @returns {Object} Reference to the construct object.
          */
-        public getInstance(scope: Construct): Construct;
+        public getInstance(scope: Construct): TConstruct;
     }
 }
 
