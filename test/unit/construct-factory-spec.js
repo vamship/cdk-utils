@@ -5,6 +5,7 @@ _chai.use(require('sinon-chai'));
 _chai.use(require('chai-as-promised'));
 const _sinon = require('sinon');
 
+const Promise = require('bluebird').Promise;
 const expect = _chai.expect;
 
 const { testValues: _testValues } = require('@vamship/test-utils');
@@ -51,88 +52,86 @@ describe('ConstructFactory', () => {
 
             // Public methods
             expect(factory.init).to.be.a('function');
-            expect(factory.configure).to.be.a('function');
-            expect(factory.getInstance).to.be.a('function');
+            expect(factory.getConstruct).to.be.a('function');
 
             // Protected methods
             expect(factory._init).to.be.a('function');
-            expect(factory.configure).to.be.a('function');
         });
     });
 
     describe('_init() [default behavior]', () => {
-        it('should throw an error if invoked', () => {
+        it('should throw an error if invoked', async () => {
             const factory = _createInstance(undefined, true);
             const error = 'Not implemented (ConstructFactory._init())';
 
-            const wrapper = () => factory._init();
-            expect(wrapper).to.throw(error);
-        });
-    });
-
-    describe('_configure() [default behavior]', () => {
-        it('should do nothing when invoked', () => {
-            const factory = _createInstance(undefined, true);
-
-            factory._configure();
+            const ret = factory._init();
+            await expect(ret).to.be.rejectedWith(error);
         });
     });
 
     describe('init()', () => {
-        it('should throw an error if invoked without a valid scope', () => {
+        it('should throw an error if invoked without a valid scope', async () => {
             const inputs = _testValues.allButObject();
             const error = 'Invalid scope (arg #1)';
 
-            inputs.forEach((scope) => {
+            const result = Promise.map(inputs, (scope) => {
                 const factory = _createInstance();
                 const dirInfo = {};
                 const props = {};
-                const wrapper = () => factory.init(scope, dirInfo, props);
 
-                expect(wrapper).to.throw(error);
+                const ret = factory.init(scope, dirInfo, props);
+                return expect(ret).to.be.rejectedWith(error);
             });
+
+            await expect(result).to.have.been.fulfilled;
         });
 
-        it('should throw an error if invoked without valid dirInfo', () => {
+        it('should throw an error if invoked without valid dirInfo', async () => {
             const inputs = _testValues.allButObject();
             const error = 'Invalid dirInfo (arg #2)';
 
-            inputs.forEach((dirInfo) => {
+            const result = Promise.map(inputs, (dirInfo) => {
                 const factory = _createInstance();
                 const scope = {};
                 const props = {};
                 const wrapper = () => factory.init(scope, dirInfo, props);
 
-                expect(wrapper).to.throw(error);
+                const ret = factory.init(scope, dirInfo, props);
+                return expect(ret).to.be.rejectedWith(error);
             });
+
+            await expect(result).to.have.been.fulfilled;
         });
 
-        it('should throw an error if invoked without valid dirInfo', () => {
+        it('should throw an error if invoked without valid dirInfo', async () => {
             const inputs = _testValues.allButObject();
             const error = 'Invalid props (arg #3)';
 
-            inputs.forEach((props) => {
+            const result = Promise.map(inputs, (props) => {
                 const factory = _createInstance();
                 const scope = {};
                 const dirInfo = {};
                 const wrapper = () => factory.init(scope, dirInfo, props);
 
-                expect(wrapper).to.throw(error);
+                const ret = factory.init(scope, dirInfo, props);
+                return expect(ret).to.be.rejectedWith(error);
             });
+
+            await expect(result).to.have.been.fulfilled;
         });
 
-        it('should throw an error if a construct for the specific scope has already been created', () => {
+        it('should throw an error if a construct for the specific scope has already been created', async () => {
             const stackName = 'my_stack_1';
 
             const factory = _createInstance();
             const scope = _createScope(stackName);
             const error = `Construct has already been initialized for scope [${stackName}]`;
 
-            factory.init(scope, {}, {});
+            await factory.init(scope, {}, {});
 
-            const wrapper = () => factory.init(scope, {}, {});
+            const ret = factory.init(scope, {}, {});
 
-            expect(wrapper).to.throw(error);
+            await expect(ret).to.be.rejectedWith(error);
         });
 
         it('should invoke the protected init method to create a new instance', () => {
@@ -157,128 +156,91 @@ describe('ConstructFactory', () => {
                 props
             );
         });
-    });
 
-    describe('configure()', () => {
-        it('should throw an error if invoked without a valid scope', () => {
-            const inputs = _testValues.allButObject();
-            const error = 'Invalid scope (arg #1)';
-
-            inputs.forEach((scope) => {
-                const factory = _createInstance();
-                const dirInfo = {};
-                const props = {};
-                const wrapper = () => factory.configure(scope, dirInfo, props);
-
-                expect(wrapper).to.throw(error);
-            });
-        });
-
-        it('should throw an error if invoked without valid dirInfo', () => {
-            const inputs = _testValues.allButObject();
-            const error = 'Invalid dirInfo (arg #2)';
-
-            inputs.forEach((dirInfo) => {
-                const factory = _createInstance();
-                const scope = {};
-                const props = {};
-                const wrapper = () => factory.configure(scope, dirInfo, props);
-
-                expect(wrapper).to.throw(error);
-            });
-        });
-
-        it('should throw an error if invoked without valid dirInfo', () => {
-            const inputs = _testValues.allButObject();
-            const error = 'Invalid props (arg #3)';
-
-            inputs.forEach((props) => {
-                const factory = _createInstance();
-                const scope = {};
-                const dirInfo = {};
-                const wrapper = () => factory.configure(scope, dirInfo, props);
-
-                expect(wrapper).to.throw(error);
-            });
-        });
-
-        it('should throw an error if the construct has been initialized for the scope', () => {
-            const stackName = 'my_stack_1';
-
-            const factory = _createInstance();
-            const scope = _createScope(stackName);
-            const error = `Construct has not been initialized for scope [${stackName}]`;
-
-            const wrapper = () => factory.configure(scope, {}, {});
-
-            expect(wrapper).to.throw(error);
-        });
-
-        it('should invoke the protected configure method on an existing instance', () => {
+        it('should throw an error if the protected init method throws an error', async () => {
+            const id = _testValues.getString('id');
             const stackName = 'my_stack_1';
             const scope = _createScope(stackName);
             const dirInfo = {};
             const props = {};
-            const construct = {};
+            const error = 'something went wrong!';
 
-            const factory = _createInstance();
-            factory._init = () => construct;
+            const factory = _createInstance(id);
+            const instance = factory.getConstruct(scope);
 
-            factory.init(scope, dirInfo, props);
+            factory._init = async () => {
+                await Promise.reject(error);
+            };
 
-            const configureMock = _sinon.stub(factory, '_configure');
+            const ret = factory.init(scope, dirInfo, props);
+            await expect(ret).to.be.rejectedWith(error);
+            await expect(instance).to.be.rejectedWith(error);
+        });
 
-            expect(configureMock).to.not.have.been.called;
+        it('should resolve the promise if the protected init method resolves', async () => {
+            const id = _testValues.getString('id');
+            const stackName = 'my_stack_1';
+            const scope = _createScope(stackName);
+            const dirInfo = {};
+            const props = {};
+            const expectedConstruct = {};
 
-            factory.configure(scope, dirInfo, props);
+            const factory = _createInstance(id);
+            const instance = factory.getConstruct(scope);
 
-            expect(configureMock).to.have.been.calledOnce;
-            expect(configureMock).to.have.been.calledWithExactly(
-                construct,
-                scope,
-                dirInfo,
-                props
-            );
+            factory._init = async () => {
+                return await Promise.resolve(expectedConstruct);
+            };
+
+            const ret = factory.init(scope, dirInfo, props);
+            await expect(ret).to.be.fulfilled;
+            await expect(instance).to.be.fulfilled.then((data) => {
+                expect(data).to.equal(expectedConstruct);
+            });
         });
     });
 
-    describe('getInstance()', () => {
-        it('should throw an error if invoked without a valid scope', () => {
+    describe('getConstruct()', () => {
+        it('should throw an error if invoked without a valid scope', async () => {
             const inputs = _testValues.allButObject();
             const error = 'Invalid scope (arg #1)';
 
-            inputs.forEach((scope) => {
+            const result = Promise.map(inputs, (scope) => {
                 const factory = _createInstance();
-                const wrapper = () => factory.getInstance(scope);
 
-                expect(wrapper).to.throw(error);
+                const ret = factory.getConstruct(scope);
+                return expect(ret).to.be.rejectedWith(error);
             });
+
+            return expect(result).to.have.been.fulfilled;
         });
 
-        it('should throw an error if the construct has been initialized for the scope', () => {
-            const stackName = 'my_stack_1';
-
-            const factory = _createInstance();
-            const scope = _createScope(stackName);
-            const error = `Construct has not been initialized for scope [${stackName}]`;
-
-            const wrapper = () => factory.getInstance(scope);
-
-            expect(wrapper).to.throw(error);
-        });
-
-        it('should return a reference to the construct initialized for the specified scope', () => {
+        it('should return a reference to the construct after the init promise has been resolved', async () => {
             const stackName = 'my_stack_1';
             const scope = _createScope(stackName);
-            const construct = {};
+            const expectedConstruct = {};
+
+            let resolveWaiter = null;
 
             const factory = _createInstance();
-            factory._init = () => construct;
+            factory._init = async () => {
+                const waiter = new Promise((resolve, reject) => {
+                    resolveWaiter = resolve;
+                });
+
+                await waiter;
+                return expectedConstruct;
+            };
             factory.init(scope, {}, {});
 
-            const ret = factory.getInstance(scope);
+            const ret = factory.getConstruct(scope);
 
-            expect(ret).to.equal(construct);
+            expect(ret).to.not.equal(expectedConstruct);
+
+            resolveWaiter();
+            const construct = await ret;
+
+            expect(construct).to.equal(expectedConstruct);
         });
     });
 });

@@ -16,7 +16,7 @@ function _loadModule(path) {
 
 /**
  * Class that can be used to traverse a file system, load constructs from
- * individual files, initialize and then configure them.
+ * individual files, initialize and configure them.
  *
  * Constructs can be defined in individual files, but must be wrapped with a
  * ConstructFactory instance. Any file that does not export a ConstructFactory
@@ -74,64 +74,6 @@ class ConstructBuilder {
     }
 
     /**
-     * Recursively loads constructs from the specified directory, but in a
-     * synchronous manner. This is the synchronous equivalent of the
-     * _loadRecursive() method.
-     *
-     * @static
-     * @private
-     * @param {DirInfo} dirInfo An object representing the directory that is
-     *        currently being traversed.
-     */
-    static _loadRecursiveSync(directory) {
-        _argValidator.checkInstance(
-            directory,
-            DirInfo,
-            'Invalid directory (arg #1)'
-        );
-
-        const files = _fs.readdirSync(directory.absPath, {
-            withFileTypes: true
-        });
-
-        const results = files
-            .map((file) => {
-                const { name } = file;
-                if (file.isDirectory()) {
-                    return ConstructBuilder._loadRecursiveSync(
-                        directory.createChild(name)
-                    );
-                } else if (file.isFile() && name.endsWith('.js')) {
-                    const modulePath = _path.resolve(directory.absPath, name);
-                    return {
-                        construct: _loadModule(modulePath),
-                        directory
-                    };
-                }
-            })
-            .filter((item) => !!item)
-            .reduce((result, modules) => result.concat(modules), []);
-        return results;
-    }
-
-    /**
-     * Recursively traverses the file system and loads all constructs defined
-     * within the tree. This can be executed as an asynchronous pre-build step
-     * prior to initializing and configuring modules using build().
-     *
-     * @returns {Promise} A promise that is resolved or rejected based on the
-     *          outcome of the load operation.
-     */
-    async prefetchConstructs() {
-        const modules = await ConstructBuilder._loadRecursive(
-            new DirInfo(this._rootPath)
-        );
-        this._factoryModules = modules.filter(
-            ({ construct }) => construct instanceof ConstructFactory
-        );
-    }
-
-    /**
      * Initializes and configures each of the loaded constructs using the
      * specified scope.
      *
@@ -140,25 +82,21 @@ class ConstructBuilder {
      * @param {Object} [props] An optional collection of properties that will be
      *        passed down to the init/config operations.
      */
-    build(scope, props) {
+    async build(scope, props) {
         _argValidator.checkObject(scope, 'Invalid scope (arg #1)');
         props = Object.assign({}, props);
 
-        if (!this._factoryModules) {
-            const modules = ConstructBuilder._loadRecursiveSync(
-                new DirInfo(this._rootPath)
-            );
-            this._factoryModules = modules.filter(
-                ({ construct }) => construct instanceof ConstructFactory
-            );
-        }
+        await ConstructFactory;
 
-        this._factoryModules.forEach(({ construct, directory }) =>
-            construct.init(scope, directory, props)
+        const modules = await ConstructBuilder._loadRecursive(
+            new DirInfo(this._rootPath)
+        );
+        this._factoryModules = modules.filter(
+            ({ construct }) => construct instanceof ConstructFactory
         );
 
-        this._factoryModules.forEach(({ construct, directory }) =>
-            construct.configure(scope, directory, props)
+        return Promise.map(this._factoryModules, ({ construct, directory }) =>
+            construct.init(scope, directory, props)
         );
     }
 }
