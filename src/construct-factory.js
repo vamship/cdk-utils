@@ -101,12 +101,19 @@ class ConstructFactory {
         const constructInfo = this._getConstructInfo(scope);
         if (constructInfo.instance) {
             throw new Error(
-                `Construct has already been initialized for scope [${scope.stackName}]`
+                `Construct has already been initialized for scope [${
+                    scope.stackName
+                }]`
             );
         }
 
         try {
-            const construct = await this._init(scope, this._id, dirInfo, props);
+            const construct = await this._init(
+                scope,
+                this._id,
+                dirInfo,
+                Object.assign({}, props)
+            );
             constructInfo.instance = construct;
             constructInfo.resolve(construct);
         } catch (ex) {
