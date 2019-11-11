@@ -1,12 +1,22 @@
 import { asyncHelper as _asyncHelper } from '@vamship/test-utils';
 
 /**
+ * A mapping of step names to the step number.
+ */
+export interface ISteps {
+    /**
+     * The name/number mapping.
+     */
+    [key: string]: number;
+}
+
+/**
  * Utility class that can be used to step through execution of a method during
  * testing. Useful when testing async functions that chain several async steps
  * together.
  */
 export default class MethodController {
-    private _resolver: (step: number) => IterableIterator<any>;
+    private _resolver: (step: number) => IterableIterator<unknown>;
     private _steps: { [key: string]: number };
 
     /**
@@ -21,8 +31,8 @@ export default class MethodController {
      *        each step, allowing tests to be executed at that point.
      */
     constructor(
-        steps: { [key: string]: number },
-        resolver: (step: number) => IterableIterator<any>
+        steps: ISteps,
+        resolver: (step: number) => IterableIterator<unknown>
     ) {
         Object.keys(steps).forEach((key) => {
             this[key] = steps[key];
@@ -34,7 +44,7 @@ export default class MethodController {
     /**
      * Returns a list of steps available to the controller.
      */
-    public get steps() {
+    public get steps(): ISteps {
         return this._steps;
     }
 
@@ -51,11 +61,14 @@ export default class MethodController {
      * @return A promise that represents execution until the specified
      *         step.
      */
-    public async resolveUntil(step: number, iteration: number = 0) {
+    public async resolveUntil(
+        step: number,
+        iteration = 0
+    ): Promise<unknown> {
         let index = 0;
         let result = { value: undefined, done: false } as IteratorResult<
-            any,
-            any
+            unknown,
+            unknown
         >;
         const iterator = this._resolver(iteration);
 

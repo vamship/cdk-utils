@@ -7,7 +7,7 @@ import _chaiAsPromised from 'chai-as-promised';
 _chai.use(_sinonChai);
 _chai.use(_chaiAsPromised);
 
-const { testValues: _testValues } = require('@vamship/test-utils');
+import { testValues as _testValues } from '@vamship/test-utils';
 
 import DirInfo from '../../src/dir-info';
 const SEP = _path.sep;
@@ -23,7 +23,7 @@ describe('DirInfo', () => {
             const error = 'Invalid path (arg #1)';
 
             input.forEach((path) => {
-                const wrapper = () => new DirInfo(path);
+                const wrapper = (): DirInfo => new DirInfo(path);
 
                 expect(wrapper).to.throw(error);
             });
@@ -179,7 +179,7 @@ describe('DirInfo', () => {
 
             input.forEach((basePath) => {
                 const dirInfo = _createInstance();
-                const wrapper = () => dirInfo.getApiRoutePath(basePath);
+                const wrapper = (): string => dirInfo.getApiRoutePath(basePath);
 
                 expect(wrapper).to.throw(error);
             });
@@ -192,7 +192,7 @@ describe('DirInfo', () => {
             const dirInfo = _createInstance(path);
             const error = 'Base has more levels than the directory path';
 
-            const wrapper = () => dirInfo.getApiRoutePath(basePath);
+            const wrapper = (): string => dirInfo.getApiRoutePath(basePath);
 
             expect(wrapper).to.throw(error);
         });
@@ -204,7 +204,7 @@ describe('DirInfo', () => {
             const dirInfo = _createInstance(path);
             const error = 'Base path does not exist in directory path';
 
-            const wrapper = () => dirInfo.getApiRoutePath(basePath);
+            const wrapper = (): string => dirInfo.getApiRoutePath(basePath);
 
             expect(wrapper).to.throw(error);
         });
@@ -254,7 +254,7 @@ describe('DirInfo', () => {
 
             input.forEach((name) => {
                 const dirInfo = _createInstance();
-                const wrapper = () => dirInfo.createChild(name);
+                const wrapper = (): DirInfo => dirInfo.createChild(name);
 
                 expect(wrapper).to.throw(error);
             });

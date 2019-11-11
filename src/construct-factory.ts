@@ -16,10 +16,10 @@ class ConstructInfo<TConstruct extends Construct> {
     /**
      */
     constructor() {
-        this._resolve = () => {
+        this._resolve = (): void => {
             throw new Error('Construct promise resolver not initialized');
         };
-        this._reject = () => {
+        this._reject = (): void => {
             throw new Error('Construct promise rejecter not initialized');
         };
         this._promise = new Promise<TConstruct>((resolve, reject) => {

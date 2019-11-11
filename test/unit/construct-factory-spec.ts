@@ -81,7 +81,8 @@ describe('ConstructFactory', () => {
             const error = 'Invalid id (arg #1)';
 
             inputs.forEach((id) => {
-                const wrapper = () => new MockConstructFactory(id);
+                const wrapper = (): MockConstructFactory =>
+                    new MockConstructFactory(id);
 
                 expect(wrapper).to.throw(error);
             });
@@ -124,7 +125,6 @@ describe('ConstructFactory', () => {
                 const factory = _createInstance();
                 const scope = {} as Stack;
                 const props = _createProps();
-                const wrapper = () => factory.init(scope, dirInfo, props);
 
                 const ret = factory.init(scope, dirInfo, props);
                 return expect(ret).to.be.rejectedWith(error);
@@ -141,7 +141,6 @@ describe('ConstructFactory', () => {
                 const factory = _createInstance();
                 const scope = _createScope();
                 const dirInfo = _createDirInfo();
-                const wrapper = () => factory.init(scope, dirInfo, props);
 
                 const ret = factory.init(scope, dirInfo, props);
                 return expect(ret).to.be.rejectedWith(error);
@@ -254,8 +253,6 @@ describe('ConstructFactory', () => {
             const expectedConstruct = {
                 foo: _testValues.getString('foo')
             };
-
-            let resolveWaiter = null;
 
             const factory = _createInstance();
 

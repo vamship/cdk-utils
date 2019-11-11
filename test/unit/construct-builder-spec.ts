@@ -61,7 +61,7 @@ describe('ConstructBuilder', () => {
 
     let _fsMock;
     let _loadModuleStub;
-    let _loadRecursiveCtrl = new MethodController(
+    const _loadRecursiveCtrl = new MethodController(
         {
             READ_DIR: 0,
             END: 1
@@ -145,9 +145,10 @@ describe('ConstructBuilder', () => {
         ): string[] {
             if (typeof callback === 'string') {
                 const extension = callback;
-                callback = (item, index) => `item-${index}.${extension}`;
+                callback = (item, index): string =>
+                    `item-${index}.${extension}`;
             } else if (typeof callback !== 'function') {
-                callback = (item, index) => `item-${index}`;
+                callback = (item, index): string => `item-${index}`;
             }
 
             return new Array(count).fill(0).map(callback);
@@ -294,9 +295,9 @@ describe('ConstructBuilder', () => {
                 _loadModuleStub.throws(error);
 
                 const ret = ConstructBuilder._loadRecursive(dir);
-                await _loadRecursiveCtrl.resolveUntil(
-                    _loadRecursiveCtrl.steps.END
-                ).catch((ex) =>  undefined); // Eat exception.
+                await _loadRecursiveCtrl
+                    .resolveUntil(_loadRecursiveCtrl.steps.END)
+                    .catch((ex) => undefined); // Eat exception.
 
                 await expect(ret).to.be.rejectedWith(error);
             });
@@ -434,7 +435,8 @@ describe('ConstructBuilder', () => {
             const error = 'Invalid rootPath (arg #1)';
 
             inputs.forEach((rootPath) => {
-                const wrapper = () => new ConstructBuilder(rootPath);
+                const wrapper = (): ConstructBuilderType =>
+                    new ConstructBuilder(rootPath);
 
                 expect(wrapper).to.throw(error);
             });
@@ -578,7 +580,7 @@ describe('ConstructBuilder', () => {
             _factoryModules.forEach(
                 (factory) =>
                     (factory.construct = {
-                        init: () => undefined
+                        init: (): void => undefined
                     })
             );
 
@@ -594,7 +596,7 @@ describe('ConstructBuilder', () => {
             await builder.build(scope, props);
 
             stubs.forEach((stubs, index) => {
-                const { init, directory } = stubs;
+                const { init } = stubs;
 
                 expect(init).to.not.have.been.called;
             });
@@ -606,22 +608,6 @@ describe('ConstructBuilder', () => {
             const error = new Error('something went wrong!');
             _factoryModules = _createFactoryModules(10);
 
-            const failIndex = Math.floor(Math.random() * 10);
-            const stubs = _factoryModules.map(
-                ({ construct, directory }, index) => {
-                    const init = _sinon.stub(construct, 'init');
-                    if (index === failIndex) {
-                        init.resolves();
-                    } else {
-                        init.rejects(error);
-                    }
-                    return {
-                        init,
-                        directory
-                    };
-                }
-            );
-
             const ret = builder.build(scope);
 
             await expect(ret).to.be.rejectedWith(error);
@@ -631,12 +617,6 @@ describe('ConstructBuilder', () => {
             const builder = _createInstance();
             const scope = _createScope();
             _factoryModules = _createFactoryModules(10);
-
-            const stubs = _factoryModules.map(
-                ({ construct, directory }, index) => {
-                    const init = _sinon.stub(construct, 'init').resolves();
-                }
-            );
 
             const ret = builder.build(scope);
 

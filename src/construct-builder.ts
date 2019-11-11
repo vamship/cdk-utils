@@ -11,8 +11,8 @@ import DirInfo from './dir-info';
 
 import { IConstructProps } from './construct-props';
 
-function _loadModule(path: string): any {
-    const module = require(path);
+function _loadModule(path: string): unknown {
+    const module = require(path); // eslint-disable-line @typescript-eslint/no-var-requires
     return module.default || module;
 }
 
@@ -26,7 +26,7 @@ function _loadModule(path: string): any {
  */
 export default class ConstructBuilder {
     private _rootPath: string;
-    private _factoryModules?: ConstructFactory<any>[];
+    private _factoryModules?: ConstructFactory<any>[]; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     /**
      * @param rootPath The path to the root directory that contains the
