@@ -83,10 +83,9 @@ export default class ConstructBuilder {
      * Initializes and configures each of the loaded constructs using the
      * specified scope.
      *
-     * @param {Object} scope The scope to which each of the constructs will be
-     *        bound.
-     * @param {Object} [props] An optional collection of properties that will be
-     *        passed down to the init/config operations.
+     * @param scope The scope to which each of the constructs will be bound.
+     * @param [props] An optional collection of properties that will be passed
+     *        down to the init/config operations.
      */
     async build(scope: Construct, props: IConstructProps): Promise<void> {
         _argValidator.checkObject(scope, 'Invalid scope (arg #1)');

@@ -14,7 +14,7 @@ export default class DirInfo {
     private _absPathTokens: string[];
 
     /**
-     * @param {String} path The path to the directory.
+     * @param path The path to the directory.
      */
     constructor(path) {
         _argValidator.checkString(path, 1, 'Invalid path (arg #1)');
@@ -98,7 +98,7 @@ export default class DirInfo {
     /**
      * Creates a child directory for the current directory.
      *
-     * @param {String} name The name of the child directory
+     * @param name The name of the child directory
      *
      * @return {Object} An object that represents the child directory.
      */
