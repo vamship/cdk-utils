@@ -91,7 +91,10 @@ export default class HttpMethodFactory extends ConstructFactory<Method> {
     /**
      * @override
      */
-    protected async _init(scope: Stack, props: IConstructProps): Promise<Method> {
+    protected async _init(
+        scope: Stack,
+        props: IConstructProps
+    ): Promise<Method> {
         const apiFactory = props.apiFactory as ConstructFactory<RestApi>;
         const apiRootDir = props.apiRootDir as string;
 

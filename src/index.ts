@@ -16,4 +16,4 @@ export { default as ConstructBuilder } from './construct-builder';
 /**
  * API submodule.
  */
-export * from './api'
+export * from './api';

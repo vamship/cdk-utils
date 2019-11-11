@@ -9,7 +9,7 @@ import { Promise } from 'bluebird';
 import ConstructFactory from './construct-factory';
 import DirInfo from './dir-info';
 
-import  IConstructProps  from './construct-props';
+import IConstructProps from './construct-props';
 
 function _loadModule(path: string): unknown {
     const module = require(path); // eslint-disable-line @typescript-eslint/no-var-requires
