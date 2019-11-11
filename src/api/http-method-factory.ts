@@ -21,7 +21,7 @@ import {
 } from '@aws-cdk/aws-apigateway';
 import { Role } from '@aws-cdk/aws-iam';
 import { IFunction } from '@aws-cdk/aws-lambda';
-import { Arn, Construct, Stack } from '@aws-cdk/core';
+import { Arn, Stack } from '@aws-cdk/core';
 import { argValidator as _argValidator } from '@vamship/arg-utils';
 import { Promise } from 'bluebird';
 
