@@ -1,17 +1,27 @@
-'use strict';
+import _fs from 'fs';
+import _path from 'path';
 
-const _fs = require('fs');
-const _path = require('path');
+import { Construct } from '@aws-cdk/core';
 
-const { argValidator: _argValidator } = require('@vamship/arg-utils');
-const { Promise } = require('bluebird');
+import { argValidator as _argValidator } from '@vamship/arg-utils';
+import { Promise } from 'bluebird';
 
-const ConstructFactory = require('./construct-factory');
-const DirInfo = require('./dir-info');
+// import ConstructFactory = from './construct-factory';
+import DirInfo from './dir-info';
 
-function _loadModule(path) {
+import { IConstructProps } from './construct-props';
+
+function _loadModule(path: string): any {
     const module = require(path);
     return module.default || module;
+}
+
+class ConstructFactory {
+    private _rootPath: string;
+
+    constructor(rootPath: string) {
+        this._rootPath = rootPath;
+    }
 }
 
 /**
@@ -22,13 +32,17 @@ function _loadModule(path) {
  * ConstructFactory instance. Any file that does not export a ConstructFactory
  * instance will be ignored.
  */
-class ConstructBuilder {
+export default class ConstructBuilder {
+    private _rootPath: string;
+    private _factoryModules?: ConstructFactory[];
+
     /**
-     * @param {String} rootPath The path to the root directory that contains the
+     * @param rootPath The path to the root directory that contains the
      *        construct definitions.
      */
-    constructor(rootPath) {
+    constructor(rootPath: string) {
         _argValidator.checkString(rootPath, 1, 'Invalid rootPath (arg #1)');
+
         this._rootPath = rootPath;
         this._factoryModules = undefined;
     }
@@ -38,10 +52,10 @@ class ConstructBuilder {
      *
      * @static
      * @private
-     * @param {DirInfo} dirInfo An object representing the directory that is
+     * @param dirInfo An object representing the directory that is
      *        currently being traversed.
      */
-    static async _loadRecursive(directory) {
+    private static async _loadRecursive(directory: DirInfo): Promise<void> {
         _argValidator.checkInstance(
             directory,
             DirInfo,
@@ -82,11 +96,9 @@ class ConstructBuilder {
      * @param {Object} [props] An optional collection of properties that will be
      *        passed down to the init/config operations.
      */
-    async build(scope, props) {
+    async build(scope: Construct, props: IConstructProps): Promise<void> {
         _argValidator.checkObject(scope, 'Invalid scope (arg #1)');
         props = Object.assign({}, props);
-
-        await ConstructFactory;
 
         const modules = await ConstructBuilder._loadRecursive(
             new DirInfo(this._rootPath)
@@ -100,5 +112,3 @@ class ConstructBuilder {
         );
     }
 }
-
-module.exports = ConstructBuilder;

@@ -8,13 +8,12 @@
         "all": "gulp --series format lint test-unit clean",
         "test": "gulp test-unit"
     },
-    "keywords": [
-        "CDK",
-        "AWS"
-    ],
+    "keywords": ["CDK", "AWS"],
     "author": "Vamshi K Ponnapalli <vamshi.ponnapalli@gmail.com>",
     "license": "MIT",
     "devDependencies": {
+        "@aws-cdk/core": "^1.15.0",
+        "@types/node": "^12.12.7",
         "@vamship/build-utils": "0.0.11",
         "@vamship/test-utils": "^2.4.6",
         "ansi-colors": "^4.1.1",
@@ -34,6 +33,9 @@
         "ajv": "^6.10.2",
         "bluebird": "^3.7.0"
     },
+    "peerDependencies": {
+        "@aws-cdk/core": "^1.15.0"
+    },
     "repository": {
         "type": "git",
         "url": "https://github.com/vamship/cdk-utils.git"
@@ -44,6 +46,6 @@
     "homepage": "https://github.com/vamship/cdk-utils#readme",
     "buildMetadata": {
         "projectType": "lib",
-        "language": "js"
+        "language": "ts"
     }
 }

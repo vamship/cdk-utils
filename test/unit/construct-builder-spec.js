@@ -30,7 +30,7 @@ describe('ConstructBuilder', () => {
         return new ConstructBuilder(rootPath);
     }
 
-    function _createFactoryModules(count) {
+    function _createFactoryModules(count: number) {
         return new Array(count)
             .fill(0)
             .map((item, index) => {

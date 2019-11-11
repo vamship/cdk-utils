@@ -1,15 +1,18 @@
-'use strict';
-
-const _path = require('path');
-
-const { argValidator: _argValidator } = require('@vamship/arg-utils');
+import _path from 'path';
+import { argValidator as _argValidator } from '@vamship/arg-utils';
 
 /**
  * Class that represents a directory in a construct hierarchy. Exposes methods
  * and properties that allow directory/path information to be used to initialize
  * and/or configure the construct.
  */
-class DirInfo {
+export default class DirInfo {
+    private _name: string;
+    private _path: string;
+    private _absPath: string;
+    private _parentPath: string;
+    private _absPathTokens: string[];
+
     /**
      * @param {String} path The path to the directory.
      */
@@ -28,9 +31,9 @@ class DirInfo {
     /**
      * Gets the name of the current directory, not including any parent paths.
      *
-     * @return {String} The name of the current directory.
+     * @return The name of the current directory.
      */
-    get name() {
+    public get name(): string {
         return this._name;
     }
 
@@ -38,27 +41,27 @@ class DirInfo {
      * Gets the normalized path of the current directory. This path may be
      * relative or absolute depending on how the object was initialized.
      *
-     * @return {String} The normalized path.
+     * @return The normalized path.
      */
-    get path() {
+    public get path(): string {
         return this._path;
     }
 
     /**
      * Gets the absolute path to the current directory.
      *
-     * @return {String} The absolute directory path.
+     * @return The absolute directory path.
      */
-    get absPath() {
+    public get absPath(): string {
         return this._absPath;
     }
 
     /**
      * Gets the absolute normalized path of the parent directory.
      *
-     * @return {String} The normalized path.
+     * @return The normalized path.
      */
-    get parentPath() {
+    public get parentPath(): string {
         return this._parentPath;
     }
 
@@ -66,13 +69,13 @@ class DirInfo {
      * Gets the path to an API route, formulating the path from the specified
      * base directory.
      *
-     * @param {String} basePath The base path from which to calculate the
+     * @param basePath The base path from which to calculate the
      *        api route path. This path should separate tokens using a forward
      *        slash (/)
      *
-     * @return {String} The calculated relative path.
+     * @return The calculated relative path.
      */
-    getApiRoutePath(basePath) {
+    public getApiRoutePath(basePath: string): string {
         _argValidator.checkString(basePath, 1, 'Invalid basePath (arg #1)');
 
         const basePathTokens = _path.resolve(basePath).split(_path.sep);
@@ -99,11 +102,9 @@ class DirInfo {
      *
      * @return {Object} An object that represents the child directory.
      */
-    createChild(name) {
+    public createChild(name: string): DirInfo {
         _argValidator.checkString(name, 1, 'Invalid name (arg #1)');
 
         return new DirInfo(_path.join(this.path, name));
     }
 }
-
-module.exports = DirInfo;
