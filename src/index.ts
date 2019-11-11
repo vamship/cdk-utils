@@ -12,3 +12,8 @@ export { default as ConstructFactory } from './construct-factory';
  * Reference to the construct builder class.
  */
 export { default as ConstructBuilder } from './construct-builder';
+
+/**
+ * API submodule.
+ */
+export { * as api } from './api'
