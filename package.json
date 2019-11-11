@@ -23,6 +23,7 @@
         "@vamship/build-utils": "0.0.11",
         "@vamship/test-utils": "^2.4.6",
         "ansi-colors": "^4.1.1",
+        "aws-sdk": "^2.569.0",
         "chai": "^4.2.0",
         "chai-as-promised": "^7.1.1",
         "docdash": "^1.1.1",
@@ -40,6 +41,7 @@
         "bluebird": "^3.7.0"
     },
     "peerDependencies": {
+        "aws-sdk": "^2.569.0",
         "@aws-cdk/aws-apigateway": "^1.16.0",
         "@aws-cdk/aws-iam": "^1.16.0",
         "@aws-cdk/aws-lambda": "^1.16.0",
