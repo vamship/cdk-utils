@@ -30,7 +30,6 @@ describe('ConstructBuilder', () => {
     class MockConstructFactory extends ConstructFactory<Construct> {
         protected async _init(
             scope: Stack,
-            id: string,
             props: IConstructProps
         ): Promise<Construct> {
             return {} as Construct;

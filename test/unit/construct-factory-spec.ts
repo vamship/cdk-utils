@@ -21,7 +21,6 @@ describe('ConstructFactory', () => {
 
         protected async _init(
             scope: Stack,
-            id: string,
             props: IConstructProps
         ): Promise<Construct> {
             const construct = await new Promise<Construct>(
@@ -89,6 +88,7 @@ describe('ConstructFactory', () => {
             expect(factory).to.be.an('object');
 
             // Public methods
+            expect(factory.id).to.equal(id);
             expect(factory.init).to.be.a('function');
             expect(factory.getConstruct).to.be.a('function');
         });
@@ -157,7 +157,7 @@ describe('ConstructFactory', () => {
             factory.init(scope, props);
 
             expect(initMock).to.have.been.calledOnce;
-            expect(initMock).to.have.been.calledWithExactly(scope, id, props);
+            expect(initMock).to.have.been.calledWithExactly(scope, props);
         });
 
         it('should throw an error if the protected init method throws an error', async () => {
