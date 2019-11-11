@@ -1,7 +1,6 @@
 import { argValidator as _argValidator } from '@vamship/arg-utils';
 import { Construct, Stack } from '@aws-cdk/core';
 
-import DirInfo from './dir-info';
 import { IConstructProps } from './construct-props';
 
 /**
@@ -124,10 +123,6 @@ export default abstract class ConstructFactory<TConstruct extends Construct> {
      * @param scope The scope to which the newly created construct will
      *        be bound.
      * @param id The id of the construct.
-     * @param dirInfo An object that contains information about the
-     *        location of the construct file on the file system. This
-     *        information can be used by some constructs (API methods) for
-     *        initialization.
      * @param props An optional collection of properties that can be
      *        used to initialize the construct.
      *
@@ -137,7 +132,6 @@ export default abstract class ConstructFactory<TConstruct extends Construct> {
     protected abstract async _init(
         scope: Construct,
         id: string,
-        dirInfo: DirInfo,
         props: IConstructProps
     ): Promise<TConstruct>;
 
@@ -147,24 +141,15 @@ export default abstract class ConstructFactory<TConstruct extends Construct> {
      *
      * @param scope The scope to which the newly created construct will
      *        be bound.
-     * @param dirInfo An object that contains information about the
-     *        location of the construct file on the file system. This
-     *        information can be used by some constructs (API methods) for
-     *        initialization.
      * @param props An optional collection of properties that can be
      *        used to initialize the construct.
      *
      * @returns A promise that will be resolved after the construct
      *          has been initialized.
      */
-    async init(
-        scope: Stack,
-        dirInfo: DirInfo,
-        props: IConstructProps
-    ): Promise<void> {
+    async init(scope: Stack, props: IConstructProps): Promise<void> {
         _argValidator.checkObject(scope, 'Invalid scope (arg #1)');
-        _argValidator.checkObject(dirInfo, 'Invalid dirInfo (arg #2)');
-        _argValidator.checkObject(props, 'Invalid props (arg #3)');
+        _argValidator.checkObject(props, 'Invalid props (arg #2)');
 
         const constructInfo = this._getConstructInfo(scope);
         if (constructInfo.instance) {
@@ -177,7 +162,6 @@ export default abstract class ConstructFactory<TConstruct extends Construct> {
             const construct = await this._init(
                 scope,
                 this._id,
-                dirInfo,
                 Object.assign({}, props)
             );
             constructInfo.resolve(construct);

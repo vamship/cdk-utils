@@ -31,7 +31,6 @@ describe('ConstructBuilder', () => {
         protected async _init(
             scope: Stack,
             id: string,
-            dirInfo: DirInfo,
             props: IConstructProps
         ): Promise<Construct> {
             return {} as Construct;
@@ -535,13 +534,12 @@ describe('ConstructBuilder', () => {
             await builder.build(scope);
 
             stubs.forEach((stubs, index) => {
-                const { init, directory } = stubs;
+                const { init } = stubs;
 
                 expect(init).to.have.been.calledOnce;
-                expect(init.args[0]).to.have.length(3);
+                expect(init.args[0]).to.have.length(2);
                 expect(init.args[0][0]).to.equal(scope);
-                expect(init.args[0][1]).to.equal(directory);
-                expect(init.args[0][2]).to.deep.equal({});
+                expect(init.args[0][1]).to.deep.equal({});
             });
         });
 
@@ -562,13 +560,12 @@ describe('ConstructBuilder', () => {
             await builder.build(scope, props);
 
             stubs.forEach((stubs, index) => {
-                const { init, directory } = stubs;
+                const { init } = stubs;
 
                 expect(init).to.have.been.calledOnce;
-                expect(init.args[0]).to.have.length(3);
+                expect(init.args[0]).to.have.length(2);
                 expect(init.args[0][0]).to.equal(scope);
-                expect(init.args[0][1]).to.equal(directory);
-                expect(init.args[0][2]).to.deep.equal(props);
+                expect(init.args[0][1]).to.deep.equal(props);
             });
         });
 

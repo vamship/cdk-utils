@@ -11,7 +11,6 @@ import { Construct, Stack } from '@aws-cdk/core';
 import { testValues as _testValues } from '@vamship/test-utils';
 import { Promise } from 'bluebird';
 
-import DirInfo from '../../src/dir-info';
 import ConstructFactory from '../../src/construct-factory';
 import { IConstructProps } from '../../src/construct-props';
 
@@ -23,7 +22,6 @@ describe('ConstructFactory', () => {
         protected async _init(
             scope: Stack,
             id: string,
-            dirInfo: DirInfo,
             props: IConstructProps
         ): Promise<Construct> {
             const construct = await new Promise<Construct>(
@@ -67,10 +65,6 @@ describe('ConstructFactory', () => {
         } as Stack;
     }
 
-    function _createDirInfo(): DirInfo {
-        return {} as DirInfo;
-    }
-
     function _createProps(): IConstructProps {
         return {} as IConstructProps;
     }
@@ -107,42 +101,24 @@ describe('ConstructFactory', () => {
 
             const result = Promise.map(inputs, (scope) => {
                 const factory = _createInstance();
-                const dirInfo = _createDirInfo();
                 const props = _createProps();
 
-                const ret = factory.init(scope, dirInfo, props);
+                const ret = factory.init(scope, props);
                 return expect(ret).to.be.rejectedWith(error);
             });
 
             await expect(result).to.have.been.fulfilled;
         });
 
-        it('should throw an error if invoked without valid dirInfo', async () => {
+        it('should throw an error if invoked without valid props', async () => {
             const inputs = _testValues.allButObject();
-            const error = 'Invalid dirInfo (arg #2)';
-
-            const result = Promise.map(inputs, (dirInfo) => {
-                const factory = _createInstance();
-                const scope = {} as Stack;
-                const props = _createProps();
-
-                const ret = factory.init(scope, dirInfo, props);
-                return expect(ret).to.be.rejectedWith(error);
-            });
-
-            await expect(result).to.have.been.fulfilled;
-        });
-
-        it('should throw an error if invoked without valid dirInfo', async () => {
-            const inputs = _testValues.allButObject();
-            const error = 'Invalid props (arg #3)';
+            const error = 'Invalid props (arg #2)';
 
             const result = Promise.map(inputs, (props) => {
                 const factory = _createInstance();
                 const scope = _createScope();
-                const dirInfo = _createDirInfo();
 
-                const ret = factory.init(scope, dirInfo, props);
+                const ret = factory.init(scope, props);
                 return expect(ret).to.be.rejectedWith(error);
             });
 
@@ -156,14 +132,13 @@ describe('ConstructFactory', () => {
             const scope = _createScope(stackName);
             const error = `Construct has already been initialized for scope [${stackName}]`;
 
-            const dirInfo = _createDirInfo();
             const props = _createProps();
 
-            const firstInit = factory.init(scope, dirInfo, props);
+            const firstInit = factory.init(scope, props);
             factory.resolveInit({});
             await firstInit;
 
-            const ret = factory.init(scope, dirInfo, props);
+            const ret = factory.init(scope, props);
 
             await expect(ret).to.be.rejectedWith(error);
         });
@@ -172,7 +147,6 @@ describe('ConstructFactory', () => {
             const id = _testValues.getString('id');
             const stackName = 'my_stack_1';
             const scope = _createScope(stackName);
-            const dirInfo = _createDirInfo();
             const props = _createProps();
 
             const factory = _createInstance(id);
@@ -180,29 +154,23 @@ describe('ConstructFactory', () => {
 
             expect(initMock).to.not.have.been.called;
 
-            factory.init(scope, dirInfo, props);
+            factory.init(scope, props);
 
             expect(initMock).to.have.been.calledOnce;
-            expect(initMock).to.have.been.calledWithExactly(
-                scope,
-                id,
-                dirInfo,
-                props
-            );
+            expect(initMock).to.have.been.calledWithExactly(scope, id, props);
         });
 
         it('should throw an error if the protected init method throws an error', async () => {
             const id = _testValues.getString('id');
             const stackName = 'my_stack_1';
             const scope = _createScope(stackName);
-            const dirInfo = _createDirInfo();
             const props = _createProps();
             const error = 'something went wrong!';
 
             const factory = _createInstance(id);
             const instance = factory.getConstruct(scope);
 
-            const ret = factory.init(scope, dirInfo, props);
+            const ret = factory.init(scope, props);
             factory.rejectInit(error);
 
             await expect(ret).to.be.rejectedWith(error);
@@ -213,7 +181,6 @@ describe('ConstructFactory', () => {
             const id = _testValues.getString('id');
             const stackName = 'my_stack_1';
             const scope = _createScope(stackName);
-            const dirInfo = _createDirInfo();
             const props = _createProps();
             const expectedConstruct = {
                 foo: _testValues.getString('foo')
@@ -222,7 +189,7 @@ describe('ConstructFactory', () => {
             const factory = _createInstance(id);
             const instance = factory.getConstruct(scope);
 
-            const ret = factory.init(scope, dirInfo, props);
+            const ret = factory.init(scope, props);
             factory.resolveInit(expectedConstruct);
 
             await expect(ret).to.be.fulfilled;
@@ -256,7 +223,7 @@ describe('ConstructFactory', () => {
 
             const factory = _createInstance();
 
-            factory.init(scope, _createDirInfo(), _createProps());
+            factory.init(scope, _createProps());
 
             const ret = factory.getConstruct(scope);
 

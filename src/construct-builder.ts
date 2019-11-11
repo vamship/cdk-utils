@@ -99,8 +99,8 @@ export default class ConstructBuilder {
             ({ construct }) => construct instanceof ConstructFactory
         );
 
-        return Promise.map(this._factoryModules, ({ construct, directory }) =>
-            construct.init(scope, directory, props)
+        return Promise.map(this._factoryModules, ({ construct }) =>
+            construct.init(scope, props)
         );
     }
 }
