@@ -32,7 +32,7 @@ describe('ConstructFactory', () => {
                     this._initReject = reject;
                 }
             );
-            return {} as Construct;
+            return construct as Construct;
         }
 
         public resolveInit(construct: {}): void {
@@ -53,8 +53,7 @@ describe('ConstructFactory', () => {
     }
 
     function _createInstance(
-        id = _testValues.getString('id'),
-        noOverride = false
+        id = _testValues.getString('id')
     ): MockConstructFactory {
         return new MockConstructFactory(id);
     }
@@ -161,7 +160,9 @@ describe('ConstructFactory', () => {
             const dirInfo = _createDirInfo();
             const props = _createProps();
 
-            await factory.init(scope, dirInfo, props);
+            const firstInit = factory.init(scope, dirInfo, props);
+            factory.resolveInit({});
+            await firstInit;
 
             const ret = factory.init(scope, dirInfo, props);
 
@@ -215,7 +216,9 @@ describe('ConstructFactory', () => {
             const scope = _createScope(stackName);
             const dirInfo = _createDirInfo();
             const props = _createProps();
-            const expectedConstruct = {};
+            const expectedConstruct = {
+                foo: _testValues.getString('foo')
+            };
 
             const factory = _createInstance(id);
             const instance = factory.getConstruct(scope);
@@ -248,7 +251,9 @@ describe('ConstructFactory', () => {
         it('should return a reference to the construct after the init promise has been resolved', async () => {
             const stackName = 'my_stack_1';
             const scope = _createScope(stackName);
-            const expectedConstruct = {};
+            const expectedConstruct = {
+                foo: _testValues.getString('foo')
+            };
 
             let resolveWaiter = null;
 

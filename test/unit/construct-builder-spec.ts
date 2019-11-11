@@ -22,7 +22,8 @@ import DirInfo from '../../src/dir-info';
 import ConstructFactory from '../../src/construct-factory';
 import { IConstructProps } from '../../src/construct-props';
 
-const ConstructBuilder = _rewire('../../src/construct-builder');
+const ConstructBuilderModule = _rewire('../../src/construct-builder');
+const ConstructBuilder = ConstructBuilderModule.default;
 type ConstructBuilderType = typeof ConstructBuilder;
 
 describe('ConstructBuilder', () => {
@@ -85,11 +86,13 @@ describe('ConstructBuilder', () => {
         _fsMock.__callIndex = 0;
         _fsMock.__dirData = [[]];
 
-        ConstructBuilder.__set__('_fs', _fsMock.instance);
+        ConstructBuilderModule.__set__('fs_1', {
+            default: _fsMock.instance
+        });
 
         _loadModuleStub = _sinon.stub();
 
-        ConstructBuilder.__set__('_loadModule', _loadModuleStub);
+        ConstructBuilderModule.__set__('_loadModule', _loadModuleStub);
     });
 
     describe('[static]', () => {
@@ -293,7 +296,7 @@ describe('ConstructBuilder', () => {
                 const ret = ConstructBuilder._loadRecursive(dir);
                 await _loadRecursiveCtrl.resolveUntil(
                     _loadRecursiveCtrl.steps.END
-                );
+                ).catch((ex) =>  undefined); // Eat exception.
 
                 await expect(ret).to.be.rejectedWith(error);
             });

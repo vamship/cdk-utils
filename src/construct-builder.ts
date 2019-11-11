@@ -6,7 +6,7 @@ import { Construct } from '@aws-cdk/core';
 import { argValidator as _argValidator } from '@vamship/arg-utils';
 import { Promise } from 'bluebird';
 
-// import ConstructFactory = from './construct-factory';
+import ConstructFactory from './construct-factory';
 import DirInfo from './dir-info';
 
 import { IConstructProps } from './construct-props';
@@ -14,14 +14,6 @@ import { IConstructProps } from './construct-props';
 function _loadModule(path: string): any {
     const module = require(path);
     return module.default || module;
-}
-
-class ConstructFactory {
-    private _rootPath: string;
-
-    constructor(rootPath: string) {
-        this._rootPath = rootPath;
-    }
 }
 
 /**
@@ -34,7 +26,7 @@ class ConstructFactory {
  */
 export default class ConstructBuilder {
     private _rootPath: string;
-    private _factoryModules?: ConstructFactory[];
+    private _factoryModules?: ConstructFactory<any>[];
 
     /**
      * @param rootPath The path to the root directory that contains the
@@ -103,6 +95,7 @@ export default class ConstructBuilder {
         const modules = await ConstructBuilder._loadRecursive(
             new DirInfo(this._rootPath)
         );
+
         this._factoryModules = modules.filter(
             ({ construct }) => construct instanceof ConstructFactory
         );
