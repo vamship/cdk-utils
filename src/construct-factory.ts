@@ -169,9 +169,7 @@ export default abstract class ConstructFactory<TConstruct extends Construct> {
         const constructInfo = this._getConstructInfo(scope);
         if (constructInfo.instance) {
             throw new Error(
-                `Construct has already been initialized for scope [${
-                    scope.stackName
-                }]`
+                `Construct has already been initialized for scope [${scope.stackName}]`
             );
         }
 

@@ -61,10 +61,7 @@ export default class MethodController {
      * @return A promise that represents execution until the specified
      *         step.
      */
-    public async resolveUntil(
-        step: number,
-        iteration = 0
-    ): Promise<unknown> {
+    public async resolveUntil(step: number, iteration = 0): Promise<unknown> {
         let index = 0;
         let result = { value: undefined, done: false } as IteratorResult<
             unknown,
