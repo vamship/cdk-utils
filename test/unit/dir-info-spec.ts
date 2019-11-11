@@ -14,9 +14,7 @@ const SEP = _path.sep;
 
 describe('DirInfo', () => {
     function _createInstance(path = _testValues.getString('path')): DirInfo {
-        const dirInfo = new DirInfo(path);
-
-        return dirInfo;
+        return new DirInfo(path);
     }
 
     describe('ctor()', () => {
