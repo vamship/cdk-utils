@@ -1,27 +1,41 @@
-const { asyncHelper: _asyncHelper } = require('@vamship/test-utils');
+import { asyncHelper as _asyncHelper } from '@vamship/test-utils';
 
 /**
  * Utility class that can be used to step through execution of a method during
  * testing. Useful when testing async functions that chain several async steps
  * together.
  */
-class MethodController {
+export default class MethodController {
+    private _resolver: (step: number) => IterableIterator<any>;
+    private _steps: { [key: string]: number };
+
     /**
-     * @param {Object} steps An enumeration of execution steps. These steps can
+     * @param steps An enumeration of execution steps. These steps can
      *        be used to identify the step to run until by using a friendly step
      *        name instead of a numerical index. For ease of use, these steps
      *        will be exposed as properties of the instance, so take care to
      *        ensure that the step name does not conflict with existing
      *        properties.
-     * @param {Function} resolver A generator function that can be used to
+     * @param resolver A generator function that can be used to
      *        step through the method under test. This function must yield at
      *        each step, allowing tests to be executed at that point.
      */
-    constructor(steps, resolver) {
+    constructor(
+        steps: { [key: string]: number },
+        resolver: (step: number) => IterableIterator<any>
+    ) {
         Object.keys(steps).forEach((key) => {
             this[key] = steps[key];
         });
         this._resolver = resolver;
+        this._steps = steps;
+    }
+
+    /**
+     * Returns a list of steps available to the controller.
+     */
+    public get steps() {
+        return this._steps;
     }
 
     /**
@@ -29,18 +43,20 @@ class MethodController {
      * chaining them togehter until the specified step is reached. A promise
      * that represents the completion of the final step is returned.
      *
-     * @param {Number} step The index of the step to execute until.
-     * @param {Number} iteration An optional iteration value that is indicative of the
+     * @param step The index of the step to execute until.
+     * @param iteration An optional iteration value that is indicative of the
      *        test iteration, when the same function is invoked multiple times
      *        within a single test case.
      *
-     * @return {Promise} promise that represents execution until the specified
+     * @return A promise that represents execution until the specified
      *         step.
      */
-    async resolveUntil(step, iteration) {
-        iteration = typeof iteration === 'number' ? iteration : 0;
+    public async resolveUntil(step: number, iteration: number = 0) {
         let index = 0;
-        let result = { value: undefined, done: false };
+        let result = { value: undefined, done: false } as IteratorResult<
+            any,
+            any
+        >;
         const iterator = this._resolver(iteration);
 
         while (index < step && !result.done) {
@@ -52,4 +68,5 @@ class MethodController {
         return result.value;
     }
 }
+
 module.exports = MethodController;

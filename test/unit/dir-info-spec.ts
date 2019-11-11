@@ -1,21 +1,19 @@
-'use strict';
+import 'mocha';
+import _path from 'path';
+import _chai, { expect } from 'chai';
+import _sinonChai from 'sinon-chai';
+import _chaiAsPromised from 'chai-as-promised';
 
-const _chai = require('chai');
-_chai.use(require('sinon-chai'));
-_chai.use(require('chai-as-promised'));
+_chai.use(_sinonChai);
+_chai.use(_chaiAsPromised);
 
-const expect = _chai.expect;
-
-const _path = require('path');
 const { testValues: _testValues } = require('@vamship/test-utils');
 
-const DirInfo = require('../../src/dir-info');
+import DirInfo from '../../src/dir-info';
 const SEP = _path.sep;
 
 describe('DirInfo', () => {
-    function _createInstance(path) {
-        path = typeof path !== 'string' ? _testValues.getString('path') : path;
-
+    function _createInstance(path = _testValues.getString('path')): DirInfo {
         const dirInfo = new DirInfo(path);
 
         return dirInfo;

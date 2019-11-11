@@ -8,11 +8,15 @@
         "all": "gulp --series format lint test-unit clean",
         "test": "gulp test-unit"
     },
-    "keywords": ["CDK", "AWS"],
+    "keywords": [
+        "CDK",
+        "AWS"
+    ],
     "author": "Vamshi K Ponnapalli <vamshi.ponnapalli@gmail.com>",
     "license": "MIT",
     "devDependencies": {
         "@aws-cdk/core": "^1.15.0",
+        "@types/mocha": "^5.2.7",
         "@types/node": "^12.12.7",
         "@vamship/build-utils": "0.0.11",
         "@vamship/test-utils": "^2.4.6",

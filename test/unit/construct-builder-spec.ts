@@ -1,46 +1,60 @@
-'use strict';
+import 'mocha';
+import _chai, { expect } from 'chai';
+import _sinon from 'sinon';
+import _sinonChai from 'sinon-chai';
+import _chaiAsPromised from 'chai-as-promised';
 
-const _chai = require('chai');
-_chai.use(require('sinon-chai'));
-_chai.use(require('chai-as-promised'));
-const _sinon = require('sinon');
+_chai.use(_sinonChai);
+_chai.use(_chaiAsPromised);
 
-const expect = _chai.expect;
-
-const _path = require('path');
-const { Promise } = require('bluebird');
-const _rewire = require('rewire');
-
-const {
-    asyncHelper: _asyncHelper,
+import { Construct, Stack } from '@aws-cdk/core';
+import {
+    asyncHelper as _asyncHelper,
     ObjectMock,
-    testValues: _testValues
-} = require('@vamship/test-utils');
+    testValues as _testValues
+} from '@vamship/test-utils';
+import { Promise } from 'bluebird';
+import _path from 'path';
+import _rewire from 'rewire';
 
-const MethodController = require('../utils/method-controller');
+import MethodController from '../utils/method-controller';
+import DirInfo from '../../src/dir-info';
+import ConstructFactory from '../../src/construct-factory';
+import { IConstructProps } from '../../src/construct-props';
 
 const ConstructBuilder = _rewire('../../src/construct-builder');
-const ConstructFactory = require('../../src/construct-factory');
-const DirInfo = require('../../src/dir-info');
+type ConstructBuilderType = typeof ConstructBuilder;
 
 describe('ConstructBuilder', () => {
-    function _createInstance(rootPath) {
-        rootPath = rootPath || _testValues.getString('rootPath');
+    class MockConstructFactory extends ConstructFactory<Construct> {
+        protected async _init(
+            scope: Stack,
+            id: string,
+            dirInfo: DirInfo,
+            props: IConstructProps
+        ): Promise<Construct> {
+            return {} as Construct;
+        }
+    }
 
+    function _createInstance(
+        rootPath = _testValues.getString('rootPath')
+    ): ConstructBuilderType {
         return new ConstructBuilder(rootPath);
     }
 
-    function _createFactoryModules(count: number) {
+    function _createFactoryModules(
+        count: number
+    ): Array<{
+        construct: MockConstructFactory;
+        directory: DirInfo;
+    }> {
         return new Array(count)
             .fill(0)
-            .map((item, index) => {
-                const factory = new ConstructFactory(`factory-${index}`);
-                factory._init = () => ({});
-                return factory;
-            })
+            .map((item, index) => new MockConstructFactory(`factory-${index}`))
             .map((construct) => ({
                 construct,
-                directory: new DirInfo(_testValues.getString('name'), '')
+                directory: new DirInfo(_testValues.getString('name'))
             }));
     }
 
@@ -79,15 +93,21 @@ describe('ConstructBuilder', () => {
     });
 
     describe('[static]', () => {
-        function _createDirInfo(name, path) {
-            name = name || _testValues.getString('name');
-            path = path || _testValues.getString('path');
-
-            return new DirInfo(name, path);
+        interface IDirData {
+            name: string;
+            isDirectory: () => boolean;
+            isFile: () => boolean;
         }
 
-        function _createDirList(dirs, files) {
-            const dirList = [];
+        function _createDirInfo(
+            name = _testValues.getString('name'),
+            path = _testValues.getString('path')
+        ): DirInfo {
+            return new DirInfo(name);
+        }
+
+        function _createDirList(dirs: string[], files: string[]): IDirData[] {
+            const dirList: IDirData[] = [];
 
             dirs = dirs || [];
             files = files || [];
@@ -113,7 +133,13 @@ describe('ConstructBuilder', () => {
             return dirList;
         }
 
-        function _buildFileList(callback, count) {
+        function _buildFileList(
+            callback:
+                | string
+                | ((item: string, index: number) => string)
+                | undefined,
+            count = 3
+        ): string[] {
             if (typeof callback === 'string') {
                 const extension = callback;
                 callback = (item, index) => `item-${index}.${extension}`;
@@ -121,7 +147,6 @@ describe('ConstructBuilder', () => {
                 callback = (item, index) => `item-${index}`;
             }
 
-            count = typeof count !== 'number' ? 3 : count;
             return new Array(count).fill(0).map(callback);
         }
 
@@ -150,7 +175,7 @@ describe('ConstructBuilder', () => {
                 ConstructBuilder._loadRecursive(dir);
 
                 await _loadRecursiveCtrl.resolveUntil(
-                    _loadRecursiveCtrl.READ_DIR
+                    _loadRecursiveCtrl.steps.READ_DIR
                 );
 
                 expect(readdirMethod.stub).to.have.been.calledOnce;
@@ -170,7 +195,7 @@ describe('ConstructBuilder', () => {
 
                 const ret = ConstructBuilder._loadRecursive(dir);
                 await _loadRecursiveCtrl.resolveUntil(
-                    _loadRecursiveCtrl.READ_DIR
+                    _loadRecursiveCtrl.steps.READ_DIR
                 );
 
                 const callback = readdirMethod.stub.args[0][2];
@@ -183,7 +208,7 @@ describe('ConstructBuilder', () => {
                 const readdirMethod = _fsMock.mocks.readdir;
                 const dir = _createDirInfo();
                 const fileList = _buildFileList('.js', 5);
-                const dirList = _buildFileList(null, 5);
+                const dirList = _buildFileList(undefined, 5);
 
                 _fsMock.__dirData[0] = _createDirList(dirList, fileList).map(
                     (item) => {
@@ -198,7 +223,9 @@ describe('ConstructBuilder', () => {
                 expect(_loadModuleStub).to.not.have.been.called;
 
                 ConstructBuilder._loadRecursive(dir);
-                await _loadRecursiveCtrl.resolveUntil(_loadRecursiveCtrl.END);
+                await _loadRecursiveCtrl.resolveUntil(
+                    _loadRecursiveCtrl.steps.END
+                );
 
                 expect(readdirMethod.stub).to.have.been.calledOnce;
                 expect(_loadModuleStub).to.not.have.been.called;
@@ -216,7 +243,9 @@ describe('ConstructBuilder', () => {
                 expect(_loadModuleStub).to.not.have.been.called;
 
                 ConstructBuilder._loadRecursive(dir);
-                await _loadRecursiveCtrl.resolveUntil(_loadRecursiveCtrl.END);
+                await _loadRecursiveCtrl.resolveUntil(
+                    _loadRecursiveCtrl.steps.END
+                );
 
                 // No recursive calls to readdir because there are no child dirs
                 expect(readdirMethod.stub).to.have.been.calledOnce;
@@ -236,7 +265,7 @@ describe('ConstructBuilder', () => {
 
                 ConstructBuilder._loadRecursive(dir);
                 await _loadRecursiveCtrl
-                    .resolveUntil(_loadRecursiveCtrl.END)
+                    .resolveUntil(_loadRecursiveCtrl.steps.END)
                     .then(_asyncHelper.wait(10));
 
                 // No recursive calls to readdir because there are no child dirs
@@ -262,7 +291,9 @@ describe('ConstructBuilder', () => {
                 _loadModuleStub.throws(error);
 
                 const ret = ConstructBuilder._loadRecursive(dir);
-                await _loadRecursiveCtrl.resolveUntil(_loadRecursiveCtrl.END);
+                await _loadRecursiveCtrl.resolveUntil(
+                    _loadRecursiveCtrl.steps.END
+                );
 
                 await expect(ret).to.be.rejectedWith(error);
             });
@@ -284,7 +315,7 @@ describe('ConstructBuilder', () => {
                     expect(loadRecursiveStub).to.not.have.been.called;
 
                     await _loadRecursiveCtrl.resolveUntil(
-                        _loadRecursiveCtrl.END
+                        _loadRecursiveCtrl.steps.END
                     );
 
                     expect(loadRecursiveStub).to.have.been.called;
@@ -323,7 +354,7 @@ describe('ConstructBuilder', () => {
                     loadRecursiveStub.throws(error);
 
                     await _loadRecursiveCtrl.resolveUntil(
-                        _loadRecursiveCtrl.END
+                        _loadRecursiveCtrl.steps.END
                     );
                     await expect(ret).to.be.rejectedWith(error);
                 } finally {
@@ -358,10 +389,10 @@ describe('ConstructBuilder', () => {
                 ];
                 _fsMock.__dirData = dirTree;
 
-                const expectedConstructs = [];
+                const expectedConstructs: ConstructFactory<Construct>[] = [];
 
                 _loadModuleStub.callsFake((path) => {
-                    const construct = new ConstructFactory(path);
+                    const construct = new MockConstructFactory(path);
                     expectedConstructs.push(construct);
                     return construct;
                 });
@@ -370,7 +401,7 @@ describe('ConstructBuilder', () => {
 
                 await Promise.mapSeries(dirTree, async (item, iteration) => {
                     await _loadRecursiveCtrl.resolveUntil(
-                        _loadRecursiveCtrl.END,
+                        _loadRecursiveCtrl.steps.END,
                         iteration
                     );
                     await _asyncHelper.wait(10)();
@@ -430,9 +461,9 @@ describe('ConstructBuilder', () => {
             _loadRecursiveStub.restore();
         });
 
-        function _createScope(stackName) {
-            stackName = stackName || _testValues.getString('stackName');
-
+        function _createScope(
+            stackName = _testValues.getString('stackName')
+        ): { stackName: string } {
             return { stackName };
         }
 

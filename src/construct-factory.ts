@@ -9,8 +9,8 @@ import { IConstructProps } from './construct-props';
  */
 class ConstructInfo<TConstruct extends Construct> {
     private _instance?: TConstruct;
-    private _resolve: (Construct) => void;
-    private _reject: (Error) => void;
+    private _resolve: (construct: TConstruct) => void;
+    private _reject: (error: Error | string) => void;
     private _promise: Promise<TConstruct>;
 
     /**
@@ -77,7 +77,7 @@ class ConstructInfo<TConstruct extends Construct> {
  * It is up to the developer to ensure that no circular dependencies are created
  * between constructs.
  */
-class ConstructFactory<TConstruct extends Construct> {
+export default abstract class ConstructFactory<TConstruct extends Construct> {
     private _id: string;
     private _constructMap: {
         [stackName: string]: ConstructInfo<TConstruct>;
@@ -120,6 +120,7 @@ class ConstructFactory<TConstruct extends Construct> {
      * current implementation is a placeholder only, and will throw an error.
      *
      * @protected
+     * @abstract
      * @param scope The scope to which the newly created construct will
      *        be bound.
      * @param id The id of the construct.
@@ -133,14 +134,12 @@ class ConstructFactory<TConstruct extends Construct> {
      * @returns A promise that will be resolved after the construct
      *          has been initialized.
      */
-    async _init(
+    protected abstract async _init(
         scope: Construct,
         id: string,
         dirInfo: DirInfo,
         props: IConstructProps
-    ): Promise<TConstruct> {
-        throw new Error('Not implemented (ConstructFactory._init())');
-    }
+    ): Promise<TConstruct>;
 
     /**
      * Invoked to initialize the construct, and delegates actual initialization
@@ -204,5 +203,3 @@ class ConstructFactory<TConstruct extends Construct> {
         return await this._getConstructInfo(scope).promise;
     }
 }
-
-module.exports = ConstructFactory;

@@ -1,35 +1,79 @@
-'use strict';
+import 'mocha';
+import _chai, { expect } from 'chai';
+import _sinon from 'sinon';
+import _sinonChai from 'sinon-chai';
+import _chaiAsPromised from 'chai-as-promised';
 
-const _chai = require('chai');
-_chai.use(require('sinon-chai'));
-_chai.use(require('chai-as-promised'));
-const _sinon = require('sinon');
+_chai.use(_sinonChai);
+_chai.use(_chaiAsPromised);
 
-const Promise = require('bluebird').Promise;
-const expect = _chai.expect;
+import { Construct, Stack } from '@aws-cdk/core';
+import { testValues as _testValues } from '@vamship/test-utils';
+import { Promise } from 'bluebird';
 
-const { testValues: _testValues } = require('@vamship/test-utils');
-
-const ConstructFactory = require('../../src/construct-factory');
+import DirInfo from '../../src/dir-info';
+import ConstructFactory from '../../src/construct-factory';
+import { IConstructProps } from '../../src/construct-props';
 
 describe('ConstructFactory', () => {
-    function _createInstance(id, noOverride) {
-        id = id || _testValues.getString('id');
+    class MockConstructFactory extends ConstructFactory<Construct> {
+        private _initResolve?: (construct: Construct) => void;
+        private _initReject?: (error: Error | string) => void;
 
-        const factory = new ConstructFactory(id);
-        if (!noOverride) {
-            factory._init = () => ({});
+        protected async _init(
+            scope: Stack,
+            id: string,
+            dirInfo: DirInfo,
+            props: IConstructProps
+        ): Promise<Construct> {
+            const construct = await new Promise<Construct>(
+                (resolve, reject) => {
+                    this._initResolve = resolve;
+                    this._initReject = reject;
+                }
+            );
+            return {} as Construct;
         }
 
-        return factory;
+        public resolveInit(construct: {}): void {
+            if (typeof this._initResolve !== 'undefined') {
+                this._initResolve(construct as Construct);
+            } else {
+                throw new Error('Construct not initialized');
+            }
+        }
+
+        public rejectInit(error: Error | string): void {
+            if (typeof this._initReject !== 'undefined') {
+                this._initReject(error);
+            } else {
+                throw new Error('Construct not initialized');
+            }
+        }
     }
 
-    function _createScope(stackName) {
-        stackName = stackName || _testValues.getString('stackName');
+    function _createInstance(
+        id = _testValues.getString('id'),
+        noOverride = false
+    ): MockConstructFactory {
+        return new MockConstructFactory(id);
+    }
+
+    function _createScope(
+        stackName = _testValues.getString('stackName')
+    ): Stack {
         return {
             stackName,
             toString: () => stackName
-        };
+        } as Stack;
+    }
+
+    function _createDirInfo(): DirInfo {
+        return {} as DirInfo;
+    }
+
+    function _createProps(): IConstructProps {
+        return {} as IConstructProps;
     }
 
     describe('ctor()', () => {
@@ -38,7 +82,7 @@ describe('ConstructFactory', () => {
             const error = 'Invalid id (arg #1)';
 
             inputs.forEach((id) => {
-                const wrapper = () => new ConstructFactory(id);
+                const wrapper = () => new MockConstructFactory(id);
 
                 expect(wrapper).to.throw(error);
             });
@@ -46,26 +90,13 @@ describe('ConstructFactory', () => {
 
         it('should return an object with the expected methods and properties', () => {
             const id = _testValues.getString('id');
-            const factory = new ConstructFactory(id);
+            const factory = new MockConstructFactory(id);
 
             expect(factory).to.be.an('object');
 
             // Public methods
             expect(factory.init).to.be.a('function');
             expect(factory.getConstruct).to.be.a('function');
-
-            // Protected methods
-            expect(factory._init).to.be.a('function');
-        });
-    });
-
-    describe('_init() [default behavior]', () => {
-        it('should throw an error if invoked', async () => {
-            const factory = _createInstance(undefined, true);
-            const error = 'Not implemented (ConstructFactory._init())';
-
-            const ret = factory._init();
-            await expect(ret).to.be.rejectedWith(error);
         });
     });
 
@@ -76,8 +107,8 @@ describe('ConstructFactory', () => {
 
             const result = Promise.map(inputs, (scope) => {
                 const factory = _createInstance();
-                const dirInfo = {};
-                const props = {};
+                const dirInfo = _createDirInfo();
+                const props = _createProps();
 
                 const ret = factory.init(scope, dirInfo, props);
                 return expect(ret).to.be.rejectedWith(error);
@@ -92,8 +123,8 @@ describe('ConstructFactory', () => {
 
             const result = Promise.map(inputs, (dirInfo) => {
                 const factory = _createInstance();
-                const scope = {};
-                const props = {};
+                const scope = {} as Stack;
+                const props = _createProps();
                 const wrapper = () => factory.init(scope, dirInfo, props);
 
                 const ret = factory.init(scope, dirInfo, props);
@@ -109,8 +140,8 @@ describe('ConstructFactory', () => {
 
             const result = Promise.map(inputs, (props) => {
                 const factory = _createInstance();
-                const scope = {};
-                const dirInfo = {};
+                const scope = _createScope();
+                const dirInfo = _createDirInfo();
                 const wrapper = () => factory.init(scope, dirInfo, props);
 
                 const ret = factory.init(scope, dirInfo, props);
@@ -127,9 +158,12 @@ describe('ConstructFactory', () => {
             const scope = _createScope(stackName);
             const error = `Construct has already been initialized for scope [${stackName}]`;
 
-            await factory.init(scope, {}, {});
+            const dirInfo = _createDirInfo();
+            const props = _createProps();
 
-            const ret = factory.init(scope, {}, {});
+            await factory.init(scope, dirInfo, props);
+
+            const ret = factory.init(scope, dirInfo, props);
 
             await expect(ret).to.be.rejectedWith(error);
         });
@@ -138,8 +172,8 @@ describe('ConstructFactory', () => {
             const id = _testValues.getString('id');
             const stackName = 'my_stack_1';
             const scope = _createScope(stackName);
-            const dirInfo = {};
-            const props = {};
+            const dirInfo = _createDirInfo();
+            const props = _createProps();
 
             const factory = _createInstance(id);
             const initMock = _sinon.stub(factory, '_init');
@@ -161,18 +195,16 @@ describe('ConstructFactory', () => {
             const id = _testValues.getString('id');
             const stackName = 'my_stack_1';
             const scope = _createScope(stackName);
-            const dirInfo = {};
-            const props = {};
+            const dirInfo = _createDirInfo();
+            const props = _createProps();
             const error = 'something went wrong!';
 
             const factory = _createInstance(id);
             const instance = factory.getConstruct(scope);
 
-            factory._init = async () => {
-                await Promise.reject(error);
-            };
-
             const ret = factory.init(scope, dirInfo, props);
+            factory.rejectInit(error);
+
             await expect(ret).to.be.rejectedWith(error);
             await expect(instance).to.be.rejectedWith(error);
         });
@@ -181,18 +213,16 @@ describe('ConstructFactory', () => {
             const id = _testValues.getString('id');
             const stackName = 'my_stack_1';
             const scope = _createScope(stackName);
-            const dirInfo = {};
-            const props = {};
+            const dirInfo = _createDirInfo();
+            const props = _createProps();
             const expectedConstruct = {};
 
             const factory = _createInstance(id);
             const instance = factory.getConstruct(scope);
 
-            factory._init = async () => {
-                return await Promise.resolve(expectedConstruct);
-            };
-
             const ret = factory.init(scope, dirInfo, props);
+            factory.resolveInit(expectedConstruct);
+
             await expect(ret).to.be.fulfilled;
             await expect(instance).to.be.fulfilled.then((data) => {
                 expect(data).to.equal(expectedConstruct);
@@ -223,21 +253,14 @@ describe('ConstructFactory', () => {
             let resolveWaiter = null;
 
             const factory = _createInstance();
-            factory._init = async () => {
-                const waiter = new Promise((resolve, reject) => {
-                    resolveWaiter = resolve;
-                });
 
-                await waiter;
-                return expectedConstruct;
-            };
-            factory.init(scope, {}, {});
+            factory.init(scope, _createDirInfo(), _createProps());
 
             const ret = factory.getConstruct(scope);
 
             expect(ret).to.not.equal(expectedConstruct);
 
-            resolveWaiter();
+            factory.resolveInit(expectedConstruct);
             const construct = await ret;
 
             expect(construct).to.equal(expectedConstruct);
