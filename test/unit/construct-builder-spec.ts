@@ -608,6 +608,21 @@ describe('ConstructBuilder', () => {
             const error = new Error('something went wrong!');
             _factoryModules = _createFactoryModules(10);
 
+            const failIndex = Math.floor(Math.random() * 10);
+
+            _factoryModules.map(({ construct, directory }, index) => {
+                const init = _sinon.stub(construct, 'init');
+                if (index === failIndex) {
+                    init.resolves();
+                } else {
+                    init.rejects(error);
+                }
+                return {
+                    init,
+                    directory
+                };
+            });
+
             const ret = builder.build(scope);
 
             await expect(ret).to.be.rejectedWith(error);
