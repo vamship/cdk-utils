@@ -7,4 +7,4 @@ export default interface IConstructProps {
      * A key value pair.
      */
     [key: string]: unknown;
-}
+} // eslint-disable-line semi

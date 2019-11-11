@@ -26,7 +26,6 @@ import { argValidator as _argValidator } from '@vamship/arg-utils';
 import { Promise } from 'bluebird';
 
 import ConstructFactory from '../construct-factory';
-import DirInfo from '../dir-info';
 import IConstructProps from '../construct-props';
 import IHttpMethodFactoryOptions from './http-method-factory-options';
 import IRequestParams from './request-params';
@@ -553,38 +552,37 @@ export default class HttpMethodFactory extends ConstructFactory<Method> {
 
         const handler = await this.getLambdaHandler(scope);
 
-        switch (typeof handler) {
-            case 'undefined':
-                // Use mock back end
-                return new MockIntegration(
-                    await this.buildMockIntegrationOptions(scope)
-                );
-            case 'string':
-                // Use lambda back end but with the lambda handler name. This
-                // approach assumes that handler function exists, and that the
-                // API gateway has necessary permissions to invoke the function.
-                const handlerArn = Arn.format(
-                    {
-                        service: 'lambda',
-                        resource: 'function',
-                        resourceName: handler,
-                        sep: ':'
-                    },
-                    scope as Stack
-                );
-
-                return new AwsIntegration({
-                    proxy: false,
+        if (typeof handler === 'undefined') {
+            // Use mock back end
+            return new MockIntegration(
+                await this.buildMockIntegrationOptions(scope)
+            );
+        } else if (typeof handler === 'string') {
+            // Use lambda back end but with the lambda handler name. This
+            // approach assumes that handler function exists, and that the
+            // API gateway has necessary permissions to invoke the function.
+            const handlerArn = Arn.format(
+                {
                     service: 'lambda',
-                    path: `2015-03-31/functions/${handlerArn}/invocations`,
-                    options: await this.buildLambdaIntegrationOptions(scope)
-                });
-            default:
-                // Use lambda back end using the handler construct reference.
-                return new LambdaIntegration(
-                    handler,
-                    await this.buildLambdaIntegrationOptions(scope)
-                );
+                    resource: 'function',
+                    resourceName: handler,
+                    sep: ':'
+                },
+                scope as Stack
+            );
+
+            return new AwsIntegration({
+                proxy: false,
+                service: 'lambda',
+                path: `2015-03-31/functions/${handlerArn}/invocations`,
+                options: await this.buildLambdaIntegrationOptions(scope)
+            });
+        } else {
+            // Use lambda back end using the handler construct reference.
+            return new LambdaIntegration(
+                handler,
+                await this.buildLambdaIntegrationOptions(scope)
+            );
         }
     }
 }

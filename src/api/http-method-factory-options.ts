@@ -6,4 +6,4 @@ export default interface IHttpMethodFactoryOptions {
      * Determines whether or not CORS is enabled for the method.
      */
     enableCors: boolean;
-}
+} // eslint-disable-line semi

@@ -41,7 +41,7 @@ export default class TemplateBuilder {
         sourceProp: string,
         destProp: string = sourceProp,
         defaultValue?: unknown
-    ) {
+    ): TemplateBuilder {
         _argValidator.checkString(sourceProp, 1, 'Invalid sourceProp (arg #1)');
         _argValidator.checkString(destProp, 1, 'Invalid destProp (arg #2)');
 
@@ -71,7 +71,7 @@ export default class TemplateBuilder {
         sourceProp: string,
         destProp: string = sourceProp,
         defaultValue?: unknown
-    ) {
+    ): TemplateBuilder {
         _argValidator.checkString(sourceProp, 1, 'Invalid sourceProp (arg #1)');
         _argValidator.checkString(destProp, 1, 'Invalid destProp (arg #2)');
 
@@ -101,7 +101,7 @@ export default class TemplateBuilder {
         sourceProp: string,
         destProp: string = sourceProp,
         defaultValue?: unknown
-    ) {
+    ): TemplateBuilder {
         _argValidator.checkString(sourceProp, 1, 'Invalid sourceProp (arg #1)');
         _argValidator.checkString(destProp, 1, 'Invalid destProp (arg #2)');
 
@@ -133,7 +133,7 @@ export default class TemplateBuilder {
         sourceProp: string,
         destProp: string,
         options: IStatementOptions
-    ) {
+    ): TemplateBuilder {
         _argValidator.checkString(sourceProp, 1, 'Invalid source (arg #1)');
         _argValidator.checkString(sourceProp, 1, 'Invalid sourceProp (arg #2)');
         _argValidator.checkString(destProp, 1, 'Invalid destProp (arg #3)');

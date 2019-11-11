@@ -23,4 +23,4 @@ export default interface IStatementOptions {
      * property.
      */
     defaultValue: unknown;
-}
+} // eslint-disable-line semi

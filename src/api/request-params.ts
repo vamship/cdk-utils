@@ -18,4 +18,4 @@ export default interface IRequestParams {
      * Defines the querystring parameters used by the method.
      */
     querystring: { [key: string]: boolean };
-}
+} // eslint-disable-line semi
