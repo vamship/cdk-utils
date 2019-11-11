@@ -1,7 +1,7 @@
 import _fs from 'fs';
 import _path from 'path';
 
-import { Construct } from '@aws-cdk/core';
+import { Stack } from '@aws-cdk/core';
 
 import { argValidator as _argValidator } from '@vamship/arg-utils';
 import { Promise } from 'bluebird';
@@ -87,7 +87,7 @@ export default class ConstructBuilder {
      * @param [props] An optional collection of properties that will be passed
      *        down to the init/config operations.
      */
-    async build(scope: Construct, props: IConstructProps): Promise<void> {
+    async build(scope: Stack, props: IConstructProps): Promise<void> {
         _argValidator.checkObject(scope, 'Invalid scope (arg #1)');
         props = Object.assign({}, props);
 
