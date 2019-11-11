@@ -1,7 +1,7 @@
 /**
  * The construct props object.
  */
-export { IConstructProps } from './construct-props';
+export { default as IConstructProps } from './construct-props';
 
 /**
  * Reference to the construct factory class.

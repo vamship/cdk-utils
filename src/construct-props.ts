@@ -2,7 +2,7 @@
  * A collection of properties that can be passed down to construct factories
  * during the init phase.
  */
-export interface IConstructProps {
+export default interface IConstructProps {
     /**
      * A key value pair.
      */
