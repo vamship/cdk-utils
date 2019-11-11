@@ -20,7 +20,7 @@ import _rewire from 'rewire';
 import MethodController from '../utils/method-controller';
 import DirInfo from '../../src/dir-info';
 import ConstructFactory from '../../src/construct-factory';
-import { IConstructProps } from '../../src/construct-props';
+import IConstructProps from '../../src/construct-props';
 
 const ConstructBuilderModule = _rewire('../../src/construct-builder');
 const ConstructBuilder = ConstructBuilderModule.default;

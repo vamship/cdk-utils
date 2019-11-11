@@ -1,17 +1,19 @@
 /**
  * The http method options interface
  */
-export { default as IHttpMethodFactoryOptions } from './http-method-factory-options';
+export {
+    default as IHttpMethodFactoryOptions
+} from './http-method-factory-options';
 
 /**
  * Interface for HTTP request parameters.
  */
-export { default as IRequestParams } from './request-params.ts';
+export { default as IRequestParams } from './request-params';
 
 /**
  * Template mapping statement options.
  */
-export { default as IStatementOptions } from './statement-options.ts';
+export { default as IStatementOptions } from './statement-options';
 
 /**
  * Reference to the HTTP method factory class.

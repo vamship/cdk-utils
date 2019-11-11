@@ -1,4 +1,6 @@
-import { argValidator as _argValidator } from '@vamship/arg-utils';
+import _path from 'path';
+import _crypto from 'crypto';
+
 import {
     AuthorizationType,
     AwsIntegration,
@@ -14,17 +16,18 @@ import {
     MethodResponse,
     MockIntegration,
     Model,
-    PassthroughBehavior
+    PassthroughBehavior,
+    RestApi
 } from '@aws-cdk/aws-apigateway';
 import { Role } from '@aws-cdk/aws-iam';
 import { IFunction } from '@aws-cdk/aws-lambda';
 import { Arn, Construct, Stack } from '@aws-cdk/core';
-import { ConstructFactory, DirInfo, IProps } from '@vamship/cdk-utils';
+import { argValidator as _argValidator } from '@vamship/arg-utils';
 import { Promise } from 'bluebird';
 
-import _path from 'path';
-import _crypto from 'crypto';
-
+import ConstructFactory from '../construct-factory';
+import DirInfo from '../dir-info';
+import IConstructProps from '../construct-props';
 import IHttpMethodFactoryOptions from './http-method-factory-options';
 import IRequestParams from './request-params';
 
@@ -88,12 +91,12 @@ export default class HttpMethodFactory extends ConstructFactory<Method> {
     /**
      * @override
      */
-    protected async _init(
-        scope: Construct,
-        props: IProps
-    ): Promise<Method> {
-        const restApi = await props.apiFactory.getConstruct(scope);
-        const requestPath = this.getRequestPath(props.apiRootDir);
+    protected async _init(scope: Stack, props: IConstructProps): Promise<Method> {
+        const apiFactory = props.apiFactory as ConstructFactory<RestApi>;
+        const apiRootDir = props.apiRootDir as string;
+
+        const restApi = await apiFactory.getConstruct(scope);
+        const requestPath = this.getRequestPath(apiRootDir);
 
         const method = new Method(scope, this.id, {
             httpMethod: this.httpMethod,

@@ -12,7 +12,7 @@ import { testValues as _testValues } from '@vamship/test-utils';
 import { Promise } from 'bluebird';
 
 import ConstructFactory from '../../src/construct-factory';
-import { IConstructProps } from '../../src/construct-props';
+import  IConstructProps  from '../../src/construct-props';
 
 describe('ConstructFactory', () => {
     class MockConstructFactory extends ConstructFactory<Construct> {
