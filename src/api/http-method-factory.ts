@@ -338,7 +338,7 @@ export default class HttpMethodFactory extends ConstructFactory<Method> {
             responseParameters[`method.response.header.${header}`] = true;
         });
 
-        const statusCodes = [200, 204, 400, 403, 404, 500, 504];
+        const statusCodes = [200, 204, 400, 403, 404, 409, 412, 500, 504];
         return await Promise.map(statusCodes, async (statusCode) => {
             let model;
             switch (statusCode) {
@@ -419,6 +419,18 @@ export default class HttpMethodFactory extends ConstructFactory<Method> {
                 statusCode: '404',
                 responseTemplates: RESPONSE_TEMPLATE_ERROR,
                 selectionPattern: '\\[NotFoundError\\].*',
+                responseParameters
+            },
+            {
+                statusCode: '409',
+                responseTemplates: RESPONSE_TEMPLATE_ERROR,
+                selectionPattern: '\\[DuplicateRecordError\\].*',
+                responseParameters
+            },
+            {
+                statusCode: '412',
+                responseTemplates: RESPONSE_TEMPLATE_ERROR,
+                selectionPattern: '\\[ConcurrencyControlError\\].*',
                 responseParameters
             },
             {
