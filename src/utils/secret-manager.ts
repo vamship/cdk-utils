@@ -37,6 +37,8 @@ export default class SecretManager {
         _argValidator.checkString(alias, 1, 'Invalid alias (arg #1)');
         _argValidator.checkString(profile, 1, 'Invalid profile (arg #2)');
 
+        alias = `alias/${alias}`;
+
         awsConfig.credentials = new SharedIniFileCredentials({ profile });
         const kms = new KMS();
 
