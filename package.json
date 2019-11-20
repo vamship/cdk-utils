@@ -1,6 +1,6 @@
 {
     "name": "@vamship/cdk-utils",
-    "version": "1.0.0-0",
+    "version": "1.0.0",
     "description": "A library of utilities that will allow CDK projects to be composed from modular files",
     "main": "src/index.js",
     "scripts": {
