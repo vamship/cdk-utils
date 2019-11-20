@@ -87,6 +87,70 @@ export default class TemplateBuilder {
     }
 
     /**
+     * Generates a set of mapping statements that map properties from a JWT
+     * token into a user object in the request. This assumes that the header
+     * value contains a valid JWT token. Requests to the server can be
+     * malformed if this assumption is not valid.
+     *
+     * @param props A hash containing a map of user fields to fields
+     *        in the JWT token. The key of the hash represents the name of a
+     *        field in the user object. The value describes the destination
+     *        field name, and addiitional attributes that determine how the
+     *        value will be mapped.
+     * @param fieldName The name of the request field  that contains the JWT
+     *        token. This will default to "Authorization" if omitted.
+     * @param destProp The name of the destination property. This will default
+     *        to '_user' if omitted.
+     *
+     * @return A reference to the current object - can be used to chain multiple
+     *         calls.
+     */
+    public mapUserFromJwt(
+        props: {
+            [sourceProp: string]: {
+                destProp: string;
+                options?: IStatementOptions;
+            };
+        },
+        fieldName = 'Authorization',
+        destProp = '_user'
+    ): TemplateBuilder {
+        _argValidator.checkObject(props, 'Invalid props (arg #1)');
+        _argValidator.checkString('fieldName', 1, 'Invalid fieldName (arg #2)');
+        _argValidator.checkString('destProp', 1, 'Invalid destProp (arg #3)');
+
+        const randomSuffix = Math.random().toString(36).substring(2, 15);
+        const rawTokenVar = `$jwt_${randomSuffix}`;
+        const decodedTokenVar = `$decoded_${randomSuffix}`;
+        const tokenJsonVar = `$json_${randomSuffix}`;
+
+        const defaultOptions = { noQuotes: false };
+        const mappingStatements = Object.keys(props)
+            .map((sourceProp) => {
+                const { destProp, options } = props[sourceProp];
+                const { noQuotes } = {
+                    ...defaultOptions,
+                    ...options
+                };
+                const quotes = noQuotes ? '' : '"';
+
+                return `\n\t\t"${sourceProp}": ${quotes}${tokenJsonVar}['${destProp}']${quotes}`;
+            })
+            .join(',');
+
+        const statement = `#set(${rawTokenVar} = $input.params('${fieldName}').split('\\.'))
+#if(${rawTokenVar}.size() > 2)
+#set(${decodedTokenVar} = $util.base64Decode(${rawTokenVar}[1]))
+#set(${tokenJsonVar} = $util.parseJson(${decodedTokenVar}))
+    "${destProp}": {${mappingStatements}
+    }
+#end`;
+
+        this._statements.push(statement);
+        return this;
+    }
+
+    /**
      * Maps a number property from the request url.
      *
      * @param sourceProp The name of the source property.
