@@ -149,6 +149,7 @@ export default class TemplateBuilder {
         _argValidator.checkString('fieldName', 1, 'Invalid fieldName (arg #2)');
         _argValidator.checkString('destProp', 1, 'Invalid destProp (arg #3)');
 
+        const comma = this._statements.length === 0 ? '' : ',';
         const randomSuffix = Math.random()
             .toString(36)
             .substring(2, 15);
@@ -174,7 +175,7 @@ export default class TemplateBuilder {
 #if(${rawTokenVar}.size() > 2)
 #set(${decodedTokenVar} = $util.base64Decode(${rawTokenVar}[1]))
 #set(${tokenJsonVar} = $util.parseJson(${decodedTokenVar}))
-    "${destProp}": {${mappingStatements}
+    ${comma}"${destProp}": {${mappingStatements}
     }
 #end`;
 
