@@ -87,6 +87,36 @@ export default class TemplateBuilder {
     }
 
     /**
+     * Maps a number property from the request url.
+     *
+     * @param sourceProp The name of the source property.
+     * @param destProp The name of the destination property. This will default
+     *        to the source prop value if omitted.
+     * @param defaultValue An optional default value to apply to the property.
+     *
+     * @return A reference to the current object - can be used to chain multiple
+     *         calls.
+     */
+    public mapNumberFromUrl(
+        sourceProp: string,
+        destProp: string = sourceProp,
+        defaultValue?: unknown
+    ): TemplateBuilder {
+        _argValidator.checkString(sourceProp, 1, 'Invalid sourceProp (arg #1)');
+        _argValidator.checkString(destProp, 1, 'Invalid destProp (arg #2)');
+
+        const options: IStatementOptions = {
+            noQuotes: true,
+            noComma: this._statements.length === 0,
+            escapeNewLine: false,
+            defaultValue
+        };
+
+        this._addStatement('url', sourceProp, destProp, options);
+        return this;
+    }
+
+    /**
      * Generates a set of mapping statements that map properties from a JWT
      * token into a user object in the request. This assumes that the header
      * value contains a valid JWT token. Requests to the server can be
@@ -136,7 +166,7 @@ export default class TemplateBuilder {
                 };
                 const quotes = noQuotes ? '' : '"';
 
-                return `\n\t\t"${sourceProp}": ${quotes}${tokenJsonVar}['${destProp}']${quotes}`;
+                return `\n  "${sourceProp}": ${quotes}${tokenJsonVar}['${destProp}']${quotes}`;
             })
             .join(',');
 
@@ -153,32 +183,27 @@ export default class TemplateBuilder {
     }
 
     /**
-     * Maps a number property from the request url.
+     * Maps a literal value to the destination payload.
      *
-     * @param sourceProp The name of the source property.
-     * @param destProp The name of the destination property. This will default
-     *        to the source prop value if omitted.
-     * @param defaultValue An optional default value to apply to the property.
+     * @param destProp The name of the destination property.
+     * @param value The literal value to be mapped.
+     * @param options A set of options to use when performing the mapping.
      *
      * @return A reference to the current object - can be used to chain multiple
      *         calls.
      */
-    public mapNumberFromUrl(
-        sourceProp: string,
-        destProp: string = sourceProp,
-        defaultValue?: unknown
+    public mapLiteral(
+        destProp: string,
+        value: string | number | boolean | object | Array<unknown>
     ): TemplateBuilder {
-        _argValidator.checkString(sourceProp, 1, 'Invalid sourceProp (arg #1)');
-        _argValidator.checkString(destProp, 1, 'Invalid destProp (arg #2)');
+        _argValidator.checkString(destProp, 1, 'Invalid destProp (arg #1)');
 
-        const options: IStatementOptions = {
-            noQuotes: true,
-            noComma: this._statements.length === 0,
-            escapeNewLine: false,
-            defaultValue
-        };
+        const quote = typeof value !== 'string' ? '' : '"';
+        const comma = this._statements.length === 0 ? '' : ',';
 
-        this._addStatement('url', sourceProp, destProp, options);
+        const statement = `  ${comma}"${destProp}": ${quote}${value}${quote}`;
+
+        this._statements.push(statement);
         return this;
     }
 
