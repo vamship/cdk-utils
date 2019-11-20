@@ -1,9 +1,7 @@
 /**
  * The http method options interface
  */
-export {
-    default as IHttpMethodFactoryOptions
-} from './http-method-factory-options';
+export { default as IHttpMethodFactoryOptions } from './http-method-factory-options';
 
 /**
  * Interface for HTTP request parameters.

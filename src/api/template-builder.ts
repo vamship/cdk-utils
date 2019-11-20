@@ -119,7 +119,9 @@ export default class TemplateBuilder {
         _argValidator.checkString('fieldName', 1, 'Invalid fieldName (arg #2)');
         _argValidator.checkString('destProp', 1, 'Invalid destProp (arg #3)');
 
-        const randomSuffix = Math.random().toString(36).substring(2, 15);
+        const randomSuffix = Math.random()
+            .toString(36)
+            .substring(2, 15);
         const rawTokenVar = `$jwt_${randomSuffix}`;
         const decodedTokenVar = `$decoded_${randomSuffix}`;
         const tokenJsonVar = `$json_${randomSuffix}`;
