@@ -71,6 +71,11 @@ export default class HttpMethodFactory extends ConstructFactory<Method> {
     ) {
         _argValidator.checkString(filePath, 1, 'Invalid filePath (arg #1)');
 
+        // NOTE: The id that we passing the absolute file path as the id
+        // of the construct. This is not the greatest idea, because it ties
+        // the CDK script to the path on a local laptop.
+        // We are mitigating this issue by ignoring this id, and using the
+        // relative path to the method in the _init() method.
         const id = `id${_crypto
             .createHash('md5')
             .update(filePath)
@@ -100,7 +105,13 @@ export default class HttpMethodFactory extends ConstructFactory<Method> {
         const restApi = await apiFactory.getConstruct(scope);
         const requestPath = this.getRequestPath(apiRootDir);
 
-        const method = new Method(scope, this.id, {
+        // We're overriding the id using the relative path of the method.
+        const id = `id${_crypto
+            .createHash('md5')
+            .update(requestPath)
+            .digest('hex')}`;
+
+        const method = new Method(scope, id, {
             httpMethod: this.httpMethod,
             integration: await this.buildIntegration(scope),
             options: await this.buildMethodOptions(scope, requestPath),
