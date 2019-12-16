@@ -105,10 +105,12 @@ export default class HttpMethodFactory extends ConstructFactory<Method> {
         const restApi = await apiFactory.getConstruct(scope);
         const requestPath = this.getRequestPath(apiRootDir);
 
-        // We're overriding the id using the relative path of the method.
+        // NOTE: We're overriding the id using the relative path of the method,
+        // and the http verb.
+        const idString = `${this.httpMethod}:${requestPath}`;
         const id = `id${_crypto
             .createHash('md5')
-            .update(requestPath)
+            .update(idString)
             .digest('hex')}`;
 
         const method = new Method(scope, id, {
