@@ -299,19 +299,21 @@ export default class TemplateBuilder {
 
         const template = [
             `#if(${checkSourceExpression} != "")`,
-            `  ${comma}"${destProp}": ${quote}${assignSourceExpression}${sourcePropTransform}${quote}`
+            `  ${comma}"${destProp}": ${quote}${assignSourceExpression}${sourcePropTransform}${quote}`,
+            '#else'
         ];
 
-        if (typeof defaultValue === undefined) {
+        if (typeof defaultValue !== 'undefined') {
             const value =
                 typeof defaultValue === 'string'
                     ? defaultValue
                     : JSON.stringify(defaultValue);
 
-            template.push('#else');
             template.push(
                 `  ${comma}"${destProp}": ${quote}${value}${sourcePropTransform}${quote}`
             );
+        } else {
+            template.push(`  ${comma}"${destProp}": null`);
         }
         template.push('#end');
 
