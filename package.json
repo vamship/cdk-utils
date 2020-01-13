@@ -14,38 +14,38 @@
     "author": "Vamshi K Ponnapalli <vamshi.ponnapalli@gmail.com>",
     "license": "MIT",
     "devDependencies": {
-        "@aws-cdk/aws-apigateway": "^1.17.1",
-        "@aws-cdk/aws-iam": "^1.17.1",
-        "@aws-cdk/aws-lambda": "^1.17.1",
-        "@aws-cdk/core": "^1.17.1",
+        "@aws-cdk/aws-apigateway": "^1.20.0",
+        "@aws-cdk/aws-iam": "^1.20.0",
+        "@aws-cdk/aws-lambda": "^1.20.0",
+        "@aws-cdk/core": "^1.20.0",
         "@types/mocha": "^5.2.7",
-        "@types/node": "^12.12.11",
-        "@vamship/build-utils": "0.0.14",
-        "@vamship/test-utils": "^2.4.6",
+        "@types/node": "^13.1.6",
+        "@vamship/build-utils": "0.0.17",
+        "@vamship/test-utils": "^2.4.7",
         "ansi-colors": "^4.1.1",
-        "aws-sdk": "^2.575.0",
+        "aws-sdk": "^2.602.0",
         "chai": "^4.2.0",
         "chai-as-promised": "^7.1.1",
         "docdash": "^1.1.1",
         "gulp": "^4.0.2",
-        "mocha": "^6.2.2",
-        "nyc": "^14.1.1",
+        "mocha": "^7.0.0",
+        "nyc": "^15.0.0",
         "rewire": "^4.0.1",
-        "sinon": "^7.5.0",
-        "sinon-chai": "^3.3.0"
+        "sinon": "^8.0.4",
+        "sinon-chai": "^3.4.0"
     },
     "dependencies": {
-        "@vamship/arg-utils": "^2.4.3",
-        "@vamship/error-types": "^1.7.4",
+        "@vamship/arg-utils": "^2.4.4",
+        "@vamship/error-types": "^1.7.6",
         "ajv": "^6.10.2",
-        "bluebird": "^3.7.1"
+        "bluebird": "^3.7.2"
     },
     "peerDependencies": {
-        "aws-sdk": "^2.575.0",
-        "@aws-cdk/aws-apigateway": "^1.17.1",
-        "@aws-cdk/aws-iam": "^1.17.1",
-        "@aws-cdk/aws-lambda": "^1.17.1",
-        "@aws-cdk/core": "^1.17.1"
+        "aws-sdk": "^2.602.0",
+        "@aws-cdk/aws-apigateway": "^1.20.0",
+        "@aws-cdk/aws-iam": "^1.20.0",
+        "@aws-cdk/aws-lambda": "^1.20.0",
+        "@aws-cdk/core": "^1.20.0"
     },
     "repository": {
         "type": "git",
