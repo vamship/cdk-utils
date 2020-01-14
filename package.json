@@ -20,7 +20,7 @@
         "@aws-cdk/core": "^1.20.0",
         "@types/mocha": "^5.2.7",
         "@types/node": "^13.1.6",
-        "@vamship/build-utils": "0.0.17",
+        "@vamship/build-utils": "0.1.0",
         "@vamship/test-utils": "^2.4.7",
         "ansi-colors": "^4.1.1",
         "aws-sdk": "^2.602.0",
@@ -28,11 +28,13 @@
         "chai-as-promised": "^7.1.1",
         "docdash": "^1.1.1",
         "gulp": "^4.0.2",
+        "gulp-typedoc": "^2.2.4",
         "mocha": "^7.0.0",
         "nyc": "^15.0.0",
         "rewire": "^4.0.1",
         "sinon": "^8.0.4",
-        "sinon-chai": "^3.4.0"
+        "sinon-chai": "^3.4.0",
+        "typedoc": "^0.16.2"
     },
     "dependencies": {
         "@vamship/arg-utils": "^2.4.4",
