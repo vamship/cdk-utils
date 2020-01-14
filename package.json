@@ -7,10 +7,8 @@
         "all": "gulp --series format lint test-unit clean",
         "test": "gulp test-unit"
     },
-    "keywords": [
-        "CDK",
-        "AWS"
-    ],
+    "files": ["package.json", "LICENSE", "README.md", "src/**/*"],
+    "keywords": ["CDK", "AWS"],
     "author": "Vamshi K Ponnapalli <vamshi.ponnapalli@gmail.com>",
     "license": "MIT",
     "devDependencies": {
