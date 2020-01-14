@@ -7,8 +7,16 @@
         "all": "gulp --series format lint test-unit clean",
         "test": "gulp test-unit"
     },
-    "files": ["package.json", "LICENSE", "README.md", "src/**/*"],
-    "keywords": ["CDK", "AWS"],
+    "files": [
+        "package.json",
+        "LICENSE",
+        "README.md",
+        "src/**/*"
+    ],
+    "keywords": [
+        "CDK",
+        "AWS"
+    ],
     "author": "Vamshi K Ponnapalli <vamshi.ponnapalli@gmail.com>",
     "license": "MIT",
     "devDependencies": {
@@ -18,8 +26,8 @@
         "@aws-cdk/core": "^1.20.0",
         "@types/mocha": "^5.2.7",
         "@types/node": "^13.1.6",
-        "@vamship/build-utils": "0.1.0",
-        "@vamship/test-utils": "^2.4.7",
+        "@vamship/build-utils": "0.1.1",
+        "@vamship/test-utils": "^2.4.8",
         "ansi-colors": "^4.1.1",
         "aws-sdk": "^2.602.0",
         "chai": "^4.2.0",
@@ -35,8 +43,8 @@
         "typedoc": "^0.16.2"
     },
     "dependencies": {
-        "@vamship/arg-utils": "^2.4.4",
-        "@vamship/error-types": "^1.7.6",
+        "@vamship/arg-utils": "^2.4.5",
+        "@vamship/error-types": "^1.7.7",
         "ajv": "^6.10.2",
         "bluebird": "^3.7.2"
     },
