@@ -1,0 +1,369 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>@vamship/cdk-utils Documentation</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.js" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">@vamship/cdk-utils Documentation</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1> @vamship/cdk-utils Documentation</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<a href="#vamshipcdk-utils" id="vamshipcdk-utils" style="color: inherit; text-decoration: none;">
+					<h1>@vamship/cdk-utils</h1>
+				</a>
+				<p><em>A library of utilities that will allow CDK projects to be composed from modular files</em></p>
+				<a href="#api-documentation" id="api-documentation" style="color: inherit; text-decoration: none;">
+					<h2>API Documentation</h2>
+				</a>
+				<p>API documentation can be found <a href="https://vamship.github.io/cdk-utils">here</a>.</p>
+				<a href="#motivation" id="motivation" style="color: inherit; text-decoration: none;">
+					<h2>Motivation</h2>
+				</a>
+				<p><a href="https://docs.aws.amazon.com/cdk/latest/guide/home.html">AWS CDK</a> provides a
+					much needed improvement over hand crafted cloud formation scripts, by allowing
+					the use of imperative statements to generate a declarative cloudformation
+				json/yaml file.</p>
+				<p>However, this library is still limited by the fact that all of the cloud
+					formation configuration for a stack resides in a single file, which can make the
+				file verbose and hard to manage as the size of the stack grows.</p>
+				<p>This library attempts to address this limitation by providing a few utilities
+				that allow:</p>
+				<ul>
+					<li>Creation of stacks by loading resources defined within individual files
+					instead of cramming multiple resource configurations into a single file.</li>
+					<li>The ability to use the organization of resource files on the file system to
+						while configuring the resources. For example, resources that represent
+						different API routes can be automatically configured based on the path to the
+					resource.</li>
+				</ul>
+				<p>While this project draws its inspiration from the now defunct
+					<a href="https://github.com/vamship/grunt-wysknd-aws-cf-generator">wysknd-aws-cf-generator</a>,
+				it now leverages the CDK which is supported by AWS.</p>
+				<a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
+					<h2>Installation</h2>
+				</a>
+				<p>This package can be installed using npm:</p>
+				<pre><code class="language-js">npm install --save-dev @vamship/cdk-utils</code></pre>
+				<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
+					<h2>Usage</h2>
+				</a>
+				<p>This library exposes two key components that allow the development of CDK
+				resources:</p>
+				<ul>
+					<li><code>ConstructFactory</code>: This is a class that serves as a lightweight wrapper
+					around the initialization and configuration of CDK resources.</li>
+					<li><code>ConstructBuilder</code>: This class recursively traverses the file system, and
+						loads and initializes all resources found on the file system. Only resources
+					of type <code>ConstructFactory</code> are loaded, and all other resources are ignored.</li>
+				</ul>
+				<a href="#example" id="example" style="color: inherit; text-decoration: none;">
+					<h3>Example</h3>
+				</a>
+				<a href="#file-organization" id="file-organization" style="color: inherit; text-decoration: none;">
+					<h4>File Organization</h4>
+				</a>
+				<p>This example assumes the following file structure:</p>
+				<pre><code>infra
+├── constructs
+│   ├── <span class="hljs-keyword">functions</span>
+│   │   └── hello-func.js
+│   └── <span class="hljs-keyword">tables</span>
+│       ├── products-<span class="hljs-keyword">table</span>.js
+│       └── users-<span class="hljs-keyword">table</span>.js
+└── <span class="hljs-keyword">index</span>.js</code></pre><p>As seen above, the directory structure has a main entry point <code>index.js</code>, and
+					a directory structure, where each file defines a single resource. The entrypoint
+					defines an instance of the <code>ConstructBuilder</code> class, and uses it to traverse
+					the directory structure under <code>constructs</code>. Each resource under <code>constructs</code>
+					defines a resource (dynamodb table/lambda function/etc.) which is wrapped inside
+				a <code>ConstructFactory</code>.</p>
+				<a href="#entrypoint" id="entrypoint" style="color: inherit; text-decoration: none;">
+					<h4>Entrypoint</h4>
+				</a>
+				<p>The content of a simple entrypoint file is shown below:</p>
+				<pre><code class="language-js"><span class="hljs-meta">#!/usr/bin/env node</span>
+
+<span class="hljs-keyword">const</span> _path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+
+<span class="hljs-keyword">const</span> { App } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@aws-cdk/core'</span>);
+<span class="hljs-keyword">const</span> { ConstructBuilder } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@vamship/cdk-utils'</span>);
+
+<span class="hljs-keyword">const</span> { Stack } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@aws-cdk/core'</span>);
+
+<span class="hljs-comment">// Initialize stacks</span>
+<span class="hljs-keyword">const</span> app = <span class="hljs-keyword">new</span> App();
+<span class="hljs-keyword">const</span> stack1 = <span class="hljs-keyword">new</span> Stack(app, <span class="hljs-string">'my-stack-1'</span>);
+<span class="hljs-keyword">const</span> stack2 = <span class="hljs-keyword">new</span> Stack(app, <span class="hljs-string">'my-stack-2'</span>);
+
+<span class="hljs-comment">// Build out stack using resources under the constructs directory</span>
+<span class="hljs-keyword">const</span> rootDir = _path.join(__dirname, <span class="hljs-string">'constructs'</span>);
+
+<span class="hljs-comment">// Initialize builder</span>
+<span class="hljs-keyword">const</span> builder = <span class="hljs-keyword">new</span> ConstructBuilder(rootDir);
+
+<span class="hljs-comment">// Build out the stacks using custom props if necessary</span>
+builder.build(stack2, { <span class="hljs-attr">keyName</span>: <span class="hljs-string">'username'</span> });
+builder.build(stack1, { <span class="hljs-attr">keyName</span>: <span class="hljs-string">'id'</span> });</code></pre>
+				<blockquote>
+					<p>NOTE: The construct builder class exposes a <code>prefetchConstructs()</code> method that
+						can be used to asynchronously load modules prior to building. If not invoked,
+					the constructs will be loaded synchronously at build time.</p>
+				</blockquote>
+				<a href="#constructs" id="constructs" style="color: inherit; text-decoration: none;">
+					<h4>Constructs</h4>
+				</a>
+				<p>The contents of the <code>users-table.js</code> file is shown below:</p>
+				<pre><code class="language-js"><span class="hljs-meta">'use strict'</span>;
+
+<span class="hljs-keyword">const</span> { ConstructFactory } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@vamship/cdk-utils'</span>);
+<span class="hljs-keyword">const</span> _dynamodb = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@aws-cdk/aws-dynamodb'</span>);
+
+<span class="hljs-keyword">const</span> factory = <span class="hljs-keyword">new</span> ConstructFactory(<span class="hljs-string">'user-table'</span>);
+
+factory._init = <span class="hljs-function">(<span class="hljs-params">scope, id, dirInfo, props</span>) =&gt;</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> _dynamodb.Table(scope, <span class="hljs-string">'UsersTable'</span>, {
+        <span class="hljs-attr">partitionKey</span>: {
+            <span class="hljs-attr">name</span>: props.keyName,
+            <span class="hljs-attr">type</span>: _dynamodb.AttributeType.STRING
+        }
+    });
+};
+
+factory._configure = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Configuring user table'</span>);
+};
+
+<span class="hljs-built_in">module</span>.exports = factory;</code></pre>
+				<p>Each resource is initialized by overriding the <code>_init()</code> method, and returning
+				the initialized resource.</p>
+				<blockquote>
+					<p>NOTE: The method to be overridden is <code>_init()</code>, not <code>init()</code>. Getting this
+						wrong will cause unexpected problems. Also remember to return the initialized
+					construct from within the method</p>
+				</blockquote>
+				<p>The <code>_configure()</code> method is intended for configuration of the resource after all
+					resources have been initialized. This method can be used to set up relationships
+				between resources (granting a function permissions on a table, for example).</p>
+				<blockquote>
+					<p>NOTE: The method to be overridden is <code>_configure()</code>, not <code>configure()</code>.
+					Getting this wrong will cause unexpected problems.</p>
+				</blockquote>
+				<p>The following is an example of the use of the <code>_configure()</code> method to setup
+				permissions, in the <code>hello-func.js</code> file:</p>
+				<pre><code class="language-js"><span class="hljs-meta">'use strict'</span>;
+
+<span class="hljs-keyword">const</span> { ConstructFactory } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@vamship/cdk-utils'</span>);
+<span class="hljs-keyword">const</span> _lambda = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@aws-cdk/aws-lambda'</span>);
+<span class="hljs-keyword">const</span> _path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+
+<span class="hljs-keyword">const</span> userTableConstruct = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../tables/users-table'</span>);
+
+<span class="hljs-keyword">const</span> factory = <span class="hljs-keyword">new</span> ConstructFactory(<span class="hljs-string">'hello-func'</span>);
+
+<span class="hljs-keyword">const</span> handlerPath = _path.resolve(__dirname, <span class="hljs-string">'../../../src/'</span>);
+<span class="hljs-built_in">console</span>.log(handlerPath);
+
+factory._init = <span class="hljs-function">(<span class="hljs-params">scope, id, dirInfo, props</span>) =&gt;</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> _lambda.Function(scope, id, {
+        <span class="hljs-attr">runtime</span>: _lambda.Runtime.NODEJS_10_X,
+        <span class="hljs-attr">handler</span>: <span class="hljs-string">'index.handler'</span>,
+        <span class="hljs-attr">code</span>: _lambda.Code.fromAsset(handlerPath)
+    });
+};
+
+<span class="hljs-comment">// Here, the parameter "construct" is a reference to the construct created</span>
+<span class="hljs-comment">// in the _init() method.</span>
+factory._configure = <span class="hljs-function">(<span class="hljs-params">construct, scope, dirInfo, props</span>) =&gt;</span> {
+    <span class="hljs-comment">// Get a reference to the initialized table construct.</span>
+    <span class="hljs-keyword">const</span> userTable = userTableConstruct.getInstance(scope);
+
+    <span class="hljs-comment">// Allow the function to access the userTable</span>
+    userTable.grantFullAccess(construct);
+};
+
+<span class="hljs-built_in">module</span>.exports = factory;</code></pre>
+				<a href="#contributing" id="contributing" style="color: inherit; text-decoration: none;">
+					<h2>Contributing</h2>
+				</a>
+				<p>Before submitting pull requests, please make sure to run through automated
+				pre commit tests/linting checks/formatting by running:</p>
+				<pre><code class="language-js">grunt all</code></pre>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_api_http_method_factory_.html">&quot;api/http-<wbr>method-<wbr>factory&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_api_http_method_factory_options_.html">&quot;api/http-<wbr>method-<wbr>factory-<wbr>options&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_api_index_.html">&quot;api/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_api_request_params_.html">&quot;api/request-<wbr>params&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_api_statement_options_.html">&quot;api/statement-<wbr>options&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_api_template_builder_.html">&quot;api/template-<wbr>builder&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_construct_builder_.html">&quot;construct-<wbr>builder&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_construct_factory_.html">&quot;construct-<wbr>factory&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_construct_props_.html">&quot;construct-<wbr>props&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_dir_info_.html">&quot;dir-<wbr>info&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_index_.html">&quot;index&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_utils_index_.html">&quot;utils/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_utils_secret_manager_.html">&quot;utils/secret-<wbr>manager&quot;</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>
