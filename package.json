@@ -26,7 +26,7 @@
         "@aws-cdk/core": "^1.21.1",
         "@types/mocha": "^5.2.7",
         "@types/node": "^13.1.8",
-        "@vamship/build-utils": "0.2.0",
+        "@vamship/build-utils": "0.2.1",
         "@vamship/test-utils": "^2.4.9",
         "ansi-colors": "^4.1.1",
         "aws-sdk": "^2.606.0",
