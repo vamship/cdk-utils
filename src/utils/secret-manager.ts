@@ -14,7 +14,7 @@ export default class SecretManager {
      * @param profile The name of the AWS profile to use when invoking the the
      *        KMS API.
      */
-    constructor(keyId: string, profile = process.env.AWS_DEFAULT_PROFILE) {
+    constructor(keyId: string, profile = process.env.AWS_PROFILE) {
         _argValidator.checkString(keyId, 1, 'Invalid keyId (arg #1)');
         _argValidator.checkString(profile, 1, 'Invalid profile (arg #2)');
 
