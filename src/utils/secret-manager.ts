@@ -32,7 +32,7 @@ export default class SecretManager {
      */
     public static async create(
         alias: string,
-        profile = process.env.AWS_DEFAULT_PROFILE
+        profile = process.env.AWS_PROFILE
     ): Promise<SecretManager> {
         _argValidator.checkString(alias, 1, 'Invalid alias (arg #1)');
         _argValidator.checkString(profile, 1, 'Invalid profile (arg #2)');
