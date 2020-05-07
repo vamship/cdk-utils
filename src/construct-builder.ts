@@ -56,7 +56,7 @@ export default class ConstructBuilder {
         const readdir = Promise.promisify(_fs.readdir.bind(_fs));
 
         const files = await readdir(directory.absPath, {
-            withFileTypes: true
+            withFileTypes: true,
         });
 
         const results = await Promise.map(files, async (file) => {
@@ -69,7 +69,7 @@ export default class ConstructBuilder {
                 const modulePath = _path.resolve(directory.absPath, name);
                 return {
                     construct: _loadModule(modulePath),
-                    directory
+                    directory,
                 };
             }
         })

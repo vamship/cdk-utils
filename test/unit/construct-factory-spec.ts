@@ -60,7 +60,7 @@ describe('ConstructFactory', () => {
     ): Stack {
         return {
             stackName,
-            toString: () => stackName
+            toString: () => stackName,
         } as Stack;
     }
 
@@ -183,7 +183,7 @@ describe('ConstructFactory', () => {
             const scope = _createScope(stackName);
             const props = _createProps();
             const expectedConstruct = {
-                foo: _testValues.getString('foo')
+                foo: _testValues.getString('foo'),
             };
 
             const factory = _createInstance(id);
@@ -218,7 +218,7 @@ describe('ConstructFactory', () => {
             const stackName = 'my_stack_1';
             const scope = _createScope(stackName);
             const expectedConstruct = {
-                foo: _testValues.getString('foo')
+                foo: _testValues.getString('foo'),
             };
 
             const factory = _createInstance();

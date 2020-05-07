@@ -11,7 +11,7 @@ const SOURCE_MAP = {
     querystring: 'params',
     header: 'params',
     url: 'params',
-    object: 'json'
+    object: 'json',
 };
 
 /**
@@ -49,7 +49,7 @@ export default class TemplateBuilder {
             noQuotes: true,
             noComma: this._statements.length === 0,
             escapeNewLine: false,
-            defaultValue
+            defaultValue,
         };
 
         this._addStatement('object', `$.${sourceProp}`, destProp, options);
@@ -79,7 +79,7 @@ export default class TemplateBuilder {
             noQuotes: false,
             noComma: this._statements.length === 0,
             escapeNewLine: false,
-            defaultValue
+            defaultValue,
         };
 
         this._addStatement('url', sourceProp, destProp, options);
@@ -109,7 +109,7 @@ export default class TemplateBuilder {
             noQuotes: true,
             noComma: this._statements.length === 0,
             escapeNewLine: false,
-            defaultValue
+            defaultValue,
         };
 
         this._addStatement('url', sourceProp, destProp, options);
@@ -150,9 +150,7 @@ export default class TemplateBuilder {
         _argValidator.checkString('destProp', 1, 'Invalid destProp (arg #3)');
 
         const comma = this._statements.length === 0 ? '' : ',';
-        const randomSuffix = Math.random()
-            .toString(36)
-            .substring(2, 15);
+        const randomSuffix = Math.random().toString(36).substring(2, 15);
         const rawTokenVar = `$jwt_${randomSuffix}`;
         const decodedTokenVar = `$decoded_${randomSuffix}`;
         const tokenJsonVar = `$json_${randomSuffix}`;
@@ -163,7 +161,7 @@ export default class TemplateBuilder {
                 const { destProp, options } = props[sourceProp];
                 const { noQuotes } = {
                     ...defaultOptions,
-                    ...options
+                    ...options,
                 };
                 const quotes = noQuotes ? '' : '"';
 
@@ -241,10 +239,7 @@ export default class TemplateBuilder {
      * @return An Apache Velocity template mapping string.
      */
     public build(): string {
-        return ['{']
-            .concat(this._statements)
-            .concat(['}'])
-            .join('\n');
+        return ['{'].concat(this._statements).concat(['}']).join('\n');
     }
 
     /**
@@ -277,7 +272,7 @@ export default class TemplateBuilder {
                 noQuotes: false,
                 noComma: false,
                 escapeNewLine: false,
-                defaultValue: undefined
+                defaultValue: undefined,
             },
             options
         );
@@ -300,7 +295,7 @@ export default class TemplateBuilder {
         const template = [
             `#if(${checkSourceExpression} != "")`,
             `  ${comma}"${destProp}": ${quote}${assignSourceExpression}${sourcePropTransform}${quote}`,
-            '#else'
+            '#else',
         ];
 
         if (typeof defaultValue !== 'undefined') {

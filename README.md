@@ -124,8 +124,8 @@ factory._init = (scope, id, dirInfo, props) => {
     return new _dynamodb.Table(scope, 'UsersTable', {
         partitionKey: {
             name: props.keyName,
-            type: _dynamodb.AttributeType.STRING
-        }
+            type: _dynamodb.AttributeType.STRING,
+        },
     });
 };
 
@@ -171,7 +171,7 @@ factory._init = (scope, id, dirInfo, props) => {
     return new _lambda.Function(scope, id, {
         runtime: _lambda.Runtime.NODEJS_10_X,
         handler: 'index.handler',
-        code: _lambda.Code.fromAsset(handlerPath)
+        code: _lambda.Code.fromAsset(handlerPath),
     });
 };
 

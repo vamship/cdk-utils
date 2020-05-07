@@ -17,7 +17,7 @@ import {
     MockIntegration,
     Model,
     PassthroughBehavior,
-    RestApi
+    RestApi,
 } from '@aws-cdk/aws-apigateway';
 import { Role } from '@aws-cdk/aws-iam';
 import { IFunction } from '@aws-cdk/aws-lambda';
@@ -33,15 +33,15 @@ import IRequestParams from './request-params';
 const RESPONSE_TEMPLATE_ERROR = {
     'application/json': `{
     "message": "$util.escapeJavaScript($input.path('$.errorMessage'))"
-}`
+}`,
 };
 
 const RESPONSE_TEMPLATE_EMPTY = {
-    'application/json': ''
+    'application/json': '',
 };
 
 const CORS_HEADERS = {
-    'Access-Control-Allow-Origin': "'*'"
+    'Access-Control-Allow-Origin': "'*'",
 };
 
 const CORS_PREFLIGHT_HEADERS = {
@@ -50,7 +50,7 @@ const CORS_PREFLIGHT_HEADERS = {
     'Access-Control-Allow-Origin': "'*'",
     'Access-Control-Allow-Credentials': "'true'",
     'Access-Control-Allow-Methods': "'GET,PUT,POST,DELETE'",
-    'Access-Control-Max-Age': "'86400'"
+    'Access-Control-Max-Age': "'86400'",
 };
 
 export default class HttpMethodFactory extends ConstructFactory<Method> {
@@ -66,7 +66,7 @@ export default class HttpMethodFactory extends ConstructFactory<Method> {
     constructor(
         filePath: string,
         options: IHttpMethodFactoryOptions = {
-            enableCors: true
+            enableCors: true,
         }
     ) {
         _argValidator.checkString(filePath, 1, 'Invalid filePath (arg #1)');
@@ -117,7 +117,7 @@ export default class HttpMethodFactory extends ConstructFactory<Method> {
             httpMethod: this.httpMethod,
             integration: await this.buildIntegration(scope),
             options: await this.buildMethodOptions(scope, requestPath),
-            resource: restApi.root.resourceForPath(requestPath)
+            resource: restApi.root.resourceForPath(requestPath),
         });
 
         return method;
@@ -220,7 +220,7 @@ export default class HttpMethodFactory extends ConstructFactory<Method> {
         const params = {
             header: {},
             path: {},
-            querystring: {}
+            querystring: {},
         };
         return requestPath.split('/').reduce((result, param) => {
             if (param.startsWith('{') && param.endsWith('}')) {
@@ -369,9 +369,9 @@ export default class HttpMethodFactory extends ConstructFactory<Method> {
             return {
                 statusCode: statusCode.toString(),
                 responseModels: {
-                    'application/json': model
+                    'application/json': model,
                 },
-                responseParameters
+                responseParameters,
             };
         });
     }
@@ -402,62 +402,62 @@ export default class HttpMethodFactory extends ConstructFactory<Method> {
         );
 
         const successResponseTemplate = {
-            'application/json': await this.getResponseTemplate(scope)
+            'application/json': await this.getResponseTemplate(scope),
         };
 
         return [
             {
                 statusCode: '200',
                 responseTemplates: successResponseTemplate,
-                responseParameters
+                responseParameters,
             },
             {
                 statusCode: '204',
                 responseTemplates: RESPONSE_TEMPLATE_EMPTY,
-                responseParameters
+                responseParameters,
             },
             {
                 statusCode: '400',
                 responseTemplates: RESPONSE_TEMPLATE_ERROR,
                 selectionPattern: '\\[((SchemaError)|(BadRequest.*))\\].*',
-                responseParameters
+                responseParameters,
             },
             {
                 statusCode: '403',
                 responseTemplates: RESPONSE_TEMPLATE_ERROR,
                 selectionPattern: '\\[(UnauthorizedError)|(Forbidden.*)\\].*',
-                responseParameters
+                responseParameters,
             },
             {
                 statusCode: '404',
                 responseTemplates: RESPONSE_TEMPLATE_ERROR,
                 selectionPattern: '\\[NotFoundError\\].*',
-                responseParameters
+                responseParameters,
             },
             {
                 statusCode: '409',
                 responseTemplates: RESPONSE_TEMPLATE_ERROR,
                 selectionPattern: '\\[DuplicateRecordError\\].*',
-                responseParameters
+                responseParameters,
             },
             {
                 statusCode: '412',
                 responseTemplates: RESPONSE_TEMPLATE_ERROR,
                 selectionPattern: '\\[ConcurrencyControlError\\].*',
-                responseParameters
+                responseParameters,
             },
             {
                 statusCode: '500',
                 responseTemplates: RESPONSE_TEMPLATE_ERROR,
                 selectionPattern: '\\[Error\\].*|body size is too long',
-                responseParameters
+                responseParameters,
             },
             {
                 statusCode: '504',
                 responseTemplates: RESPONSE_TEMPLATE_ERROR,
                 selectionPattern: '.*Task timed out.*',
-                responseParameters
-            }
+                responseParameters,
+            },
         ];
     }
 
@@ -507,9 +507,9 @@ export default class HttpMethodFactory extends ConstructFactory<Method> {
             authorizer: await this.getAuthorizer(scope),
             methodResponses: await this.getMethodResponses(scope),
             requestModels: {
-                'application/json': await this.getRequestModel(scope)
+                'application/json': await this.getRequestModel(scope),
             },
-            requestParameters
+            requestParameters,
         };
     }
 
@@ -532,10 +532,10 @@ export default class HttpMethodFactory extends ConstructFactory<Method> {
             proxy: false,
             passthroughBehavior: PassthroughBehavior.NEVER,
             requestTemplates: {
-                'application/json': await this.getRequestTemplate(scope)
+                'application/json': await this.getRequestTemplate(scope),
             },
             integrationResponses: await this.getIntegrationResponses(scope),
-            credentialsRole: await this.getLambdaInvokeRole(scope)
+            credentialsRole: await this.getLambdaInvokeRole(scope),
         };
     }
 
@@ -556,9 +556,9 @@ export default class HttpMethodFactory extends ConstructFactory<Method> {
         return {
             passthroughBehavior: PassthroughBehavior.NEVER,
             requestTemplates: {
-                'application/json': await this.getRequestTemplate(scope)
+                'application/json': await this.getRequestTemplate(scope),
             },
-            integrationResponses: await this.getIntegrationResponses(scope)
+            integrationResponses: await this.getIntegrationResponses(scope),
         };
     }
 
@@ -591,7 +591,7 @@ export default class HttpMethodFactory extends ConstructFactory<Method> {
                     service: 'lambda',
                     resource: 'function',
                     resourceName: handler,
-                    sep: ':'
+                    sep: ':',
                 },
                 scope as Stack
             );
@@ -600,7 +600,7 @@ export default class HttpMethodFactory extends ConstructFactory<Method> {
                 proxy: false,
                 service: 'lambda',
                 path: `2015-03-31/functions/${handlerArn}/invocations`,
-                options: await this.buildLambdaIntegrationOptions(scope)
+                options: await this.buildLambdaIntegrationOptions(scope),
             });
         } else {
             // Use lambda back end using the handler construct reference.

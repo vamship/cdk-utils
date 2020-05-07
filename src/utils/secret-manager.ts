@@ -75,7 +75,7 @@ export default class SecretManager {
         _argValidator.checkString(plaintext, 1, 'Invalid plaintext (arg #1)');
 
         awsConfig.credentials = new SharedIniFileCredentials({
-            profile: this._profile
+            profile: this._profile,
         });
         const kms = new KMS();
 
@@ -83,7 +83,7 @@ export default class SecretManager {
 
         const result = await encrypt({
             KeyId: this._keyId,
-            Plaintext: plaintext
+            Plaintext: plaintext,
         });
 
         if (!result || !result.CiphertextBlob) {

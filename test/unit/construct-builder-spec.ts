@@ -11,7 +11,7 @@ import { Construct, Stack } from '@aws-cdk/core';
 import {
     asyncHelper as _asyncHelper,
     ObjectMock,
-    testValues as _testValues
+    testValues as _testValues,
 } from '@vamship/test-utils';
 import { Promise } from 'bluebird';
 import _path from 'path';
@@ -53,7 +53,7 @@ describe('ConstructBuilder', () => {
             .map((item, index) => new MockConstructFactory(`factory-${index}`))
             .map((construct) => ({
                 construct,
-                directory: new DirInfo(_testValues.getString('name'))
+                directory: new DirInfo(_testValues.getString('name')),
             }));
     }
 
@@ -62,7 +62,7 @@ describe('ConstructBuilder', () => {
     const _loadRecursiveCtrl = new MethodController(
         {
             READ_DIR: 0,
-            END: 1
+            END: 1,
         },
         function* resolver(iteration) {
             const readdirMethod = _fsMock.mocks.readdir;
@@ -85,7 +85,7 @@ describe('ConstructBuilder', () => {
         _fsMock.__dirData = [[]];
 
         ConstructBuilderModule.__set__('fs_1', {
-            default: _fsMock.instance
+            default: _fsMock.instance,
         });
 
         _loadModuleStub = _sinon.stub();
@@ -117,7 +117,7 @@ describe('ConstructBuilder', () => {
                 result.push({
                     name: item,
                     isDirectory: () => true,
-                    isFile: () => false
+                    isFile: () => false,
                 });
                 return dirList;
             }, dirList);
@@ -126,7 +126,7 @@ describe('ConstructBuilder', () => {
                 result.push({
                     name: item,
                     isDirectory: () => false,
-                    isFile: () => true
+                    isFile: () => true,
                 });
                 return dirList;
             }, dirList);
@@ -184,7 +184,7 @@ describe('ConstructBuilder', () => {
                 expect(readdirMethod.stub.args[0]).to.have.length(3);
                 expect(readdirMethod.stub.args[0][0]).to.equal(dir.absPath);
                 expect(readdirMethod.stub.args[0][1]).to.deep.equal({
-                    withFileTypes: true
+                    withFileTypes: true,
                 });
             });
 
@@ -216,7 +216,7 @@ describe('ConstructBuilder', () => {
                     (item) => {
                         return Object.assign(item, {
                             isDirectory: () => false,
-                            isFile: () => false
+                            isFile: () => false,
                         });
                     }
                 );
@@ -373,7 +373,7 @@ describe('ConstructBuilder', () => {
                             'ignore-01.java',
                             'ignore-02.java',
                             'module-01.js',
-                            'module-02.js'
+                            'module-02.js',
                         ]
                     ),
                     _createDirList(
@@ -387,7 +387,7 @@ describe('ConstructBuilder', () => {
                     _createDirList(
                         [],
                         ['ignore-111.txt', 'module-111.js', 'module-112.js']
-                    )
+                    ),
                 ];
                 _fsMock.__dirData = dirTree;
 
@@ -527,7 +527,7 @@ describe('ConstructBuilder', () => {
 
             const stubs = _factoryModules.map(({ construct, directory }) => ({
                 init: _sinon.stub(construct, 'init'),
-                directory
+                directory,
             }));
 
             await builder.build(scope);
@@ -549,11 +549,11 @@ describe('ConstructBuilder', () => {
 
             const stubs = _factoryModules.map(({ construct, directory }) => ({
                 init: _sinon.stub(construct, 'init'),
-                directory
+                directory,
             }));
 
             const props = {
-                foo: _testValues.getString('foo')
+                foo: _testValues.getString('foo'),
             };
 
             await builder.build(scope, props);
@@ -576,17 +576,17 @@ describe('ConstructBuilder', () => {
             _factoryModules.forEach(
                 (factory) =>
                     (factory.construct = {
-                        init: (): void => undefined
+                        init: (): void => undefined,
                     })
             );
 
             const stubs = _factoryModules.map(({ construct, directory }) => ({
                 init: _sinon.stub(construct, 'init'),
-                directory
+                directory,
             }));
 
             const props = {
-                foo: _testValues.getString('foo')
+                foo: _testValues.getString('foo'),
             };
 
             await builder.build(scope, props);
@@ -615,7 +615,7 @@ describe('ConstructBuilder', () => {
                 }
                 return {
                     init,
-                    directory
+                    directory,
                 };
             });
 

@@ -11,7 +11,7 @@ import ConstructBuilder from '../../src/construct-builder';
 import ConstructFactory from '../../src/construct-factory';
 
 describe('index', () => {
-    it('should implement methods required by the interface', function() {
+    it('should implement methods required by the interface', function () {
         expect(_index.ConstructBuilder).to.equal(ConstructBuilder);
         expect(_index.ConstructFactory).to.equal(ConstructFactory);
     });
