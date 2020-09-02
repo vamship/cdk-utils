@@ -197,7 +197,11 @@ export default class TemplateBuilder {
     ): TemplateBuilder {
         _argValidator.checkString(destProp, 1, 'Invalid destProp (arg #1)');
 
-        const quote = typeof value !== 'string' ? '' : '"';
+        let quote = '"';
+        if(typeof value !== 'string') {
+            quote = '';
+            value = JSON.stringify(value);
+        }
         const comma = this._statements.length === 0 ? '' : ',';
 
         const statement = `  ${comma}"${destProp}": ${quote}${value}${quote}`;
