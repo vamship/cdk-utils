@@ -198,7 +198,7 @@ export default class TemplateBuilder {
         _argValidator.checkString(destProp, 1, 'Invalid destProp (arg #1)');
 
         let quote = '"';
-        if(typeof value !== 'string') {
+        if (typeof value !== 'string') {
             quote = '';
             value = JSON.stringify(value);
         }
