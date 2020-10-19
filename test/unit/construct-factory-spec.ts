@@ -7,7 +7,7 @@ import _chaiAsPromised from 'chai-as-promised';
 _chai.use(_sinonChai);
 _chai.use(_chaiAsPromised);
 
-import { Construct, Stack } from '@aws-cdk/core';
+import { Construct, Stack, App, StackProps } from '@aws-cdk/core';
 import { testValues as _testValues } from '@vamship/test-utils';
 import { Promise } from 'bluebird';
 
@@ -46,6 +46,12 @@ describe('ConstructFactory', () => {
             } else {
                 throw new Error('Construct not initialized');
             }
+        }
+    }
+
+    class MockConstruct extends Construct {
+        constructor(id: string) {
+            super(new App(), id);
         }
     }
 
@@ -182,9 +188,7 @@ describe('ConstructFactory', () => {
             const stackName = 'my_stack_1';
             const scope = _createScope(stackName);
             const props = _createProps();
-            const expectedConstruct = {
-                foo: _testValues.getString('foo'),
-            } as Construct;
+            const expectedConstruct = new MockConstruct('foo');
 
             const factory = _createInstance(id);
             const instance = factory.getConstruct(scope);
@@ -217,9 +221,7 @@ describe('ConstructFactory', () => {
         it('should return a reference to the construct after the init promise has been resolved', async () => {
             const stackName = 'my_stack_1';
             const scope = _createScope(stackName);
-            const expectedConstruct = {
-                foo: _testValues.getString('foo'),
-            };
+            const expectedConstruct = new MockConstruct('foo');
 
             const factory = _createInstance();
 
