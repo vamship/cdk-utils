@@ -16,7 +16,7 @@ export default class DirInfo {
     /**
      * @param path The path to the directory.
      */
-    constructor(path) {
+    constructor(path: string) {
         _argValidator.checkString(path, 1, 'Invalid path (arg #1)');
 
         const parsedPath = _path.parse(_path.normalize(path));

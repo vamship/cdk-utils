@@ -32,7 +32,7 @@ describe('ConstructFactory', () => {
             return construct as Construct;
         }
 
-        public resolveInit(construct: {}): void {
+        public resolveInit(construct: Record<string, unknown>): void {
             if (typeof this._initResolve !== 'undefined') {
                 this._initResolve(construct as Construct);
             } else {

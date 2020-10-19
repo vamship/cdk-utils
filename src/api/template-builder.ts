@@ -193,7 +193,12 @@ export default class TemplateBuilder {
      */
     public mapLiteral(
         destProp: string,
-        value: string | number | boolean | object | Array<unknown>
+        value:
+            | string
+            | number
+            | boolean
+            | Record<string, unknown>
+            | Array<unknown>
     ): TemplateBuilder {
         _argValidator.checkString(destProp, 1, 'Invalid destProp (arg #1)');
 
