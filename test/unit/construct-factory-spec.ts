@@ -32,7 +32,7 @@ describe('ConstructFactory', () => {
             return construct as Construct;
         }
 
-        public resolveInit(construct: Record<string, unknown>): void {
+        public resolveInit(construct: Construct): void {
             if (typeof this._initResolve !== 'undefined') {
                 this._initResolve(construct as Construct);
             } else {
@@ -135,7 +135,7 @@ describe('ConstructFactory', () => {
             const props = _createProps();
 
             const firstInit = factory.init(scope, props);
-            factory.resolveInit({});
+            factory.resolveInit({} as Construct);
             await firstInit;
 
             const ret = factory.init(scope, props);
@@ -184,7 +184,7 @@ describe('ConstructFactory', () => {
             const props = _createProps();
             const expectedConstruct = {
                 foo: _testValues.getString('foo'),
-            };
+            } as Construct;
 
             const factory = _createInstance(id);
             const instance = factory.getConstruct(scope);
