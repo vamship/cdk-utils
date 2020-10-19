@@ -7,7 +7,7 @@ import _chaiAsPromised from 'chai-as-promised';
 _chai.use(_sinonChai);
 _chai.use(_chaiAsPromised);
 
-import { Construct, Stack, App, StackProps } from '@aws-cdk/core';
+import { Construct, Stack, App } from '@aws-cdk/core';
 import { testValues as _testValues } from '@vamship/test-utils';
 import { Promise } from 'bluebird';
 
