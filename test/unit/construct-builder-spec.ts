@@ -293,9 +293,13 @@ describe('ConstructBuilder', () => {
                 _loadModuleStub.throws(error);
 
                 const ret = ConstructBuilder._loadRecursive(dir);
-                await _loadRecursiveCtrl
-                    .resolveUntil(_loadRecursiveCtrl.steps.END)
-                    .catch((ex) => undefined); // Eat exception.
+                try {
+                    await _loadRecursiveCtrl.resolveUntil(
+                        _loadRecursiveCtrl.steps.END
+                    );
+                } catch (ex) {
+                    // Eat exception.
+                }
 
                 await expect(ret).to.be.rejectedWith(error);
             });
@@ -355,9 +359,11 @@ describe('ConstructBuilder', () => {
                 try {
                     loadRecursiveStub.throws(error);
 
-                    await _loadRecursiveCtrl.resolveUntil(
-                        _loadRecursiveCtrl.steps.END
-                    );
+                    await _loadRecursiveCtrl
+                        .resolveUntil(_loadRecursiveCtrl.steps.END)
+                        .catch((ex) => {
+                            /* Do nothing */
+                        });
                     await expect(ret).to.be.rejectedWith(error);
                 } finally {
                     loadRecursiveStub.restore();
