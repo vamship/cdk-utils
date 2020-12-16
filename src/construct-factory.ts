@@ -102,7 +102,9 @@ export default abstract class ConstructFactory<
      *        be bound.
      * @returns An object that wraps the construct
      */
-    private _getConstructInfo(scope: Stack): ConstructInfo<TConstruct> {
+    private _getConstructInfo(
+        scope: Stack | CfnResource
+    ): ConstructInfo<TConstruct> {
         const { stackName } = scope;
 
         let constructInfo = this._constructMap[stackName];
