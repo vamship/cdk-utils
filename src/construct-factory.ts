@@ -1,12 +1,12 @@
 import { argValidator as _argValidator } from '@vamship/arg-utils';
-import { IConstruct, Stack } from '@aws-cdk/core';
+import { IConstruct, Stack, CfnResource } from '@aws-cdk/core';
 
 import IConstructProps from './construct-props';
 
 /**
  * Represents a construct and its related init promise.
  */
-class ConstructInfo<TConstruct extends IConstruct> {
+class ConstructInfo<TConstruct extends IConstruct | CfnResource> {
     private _instance?: TConstruct;
     private _resolve: (construct: TConstruct) => void;
     private _reject: (error: Error | string) => void;
@@ -76,7 +76,9 @@ class ConstructInfo<TConstruct extends IConstruct> {
  * It is up to the developer to ensure that no circular dependencies are created
  * between constructs.
  */
-export default abstract class ConstructFactory<TConstruct extends IConstruct> {
+export default abstract class ConstructFactory<
+    TConstruct extends IConstruct | CfnResource
+> {
     private _id: string;
     private _constructMap: {
         [stackName: string]: ConstructInfo<TConstruct>;
@@ -136,7 +138,7 @@ export default abstract class ConstructFactory<TConstruct extends IConstruct> {
      *          has been initialized.
      */
     protected abstract async _init(
-        scope: Stack,
+        scope: Stack | CfnResource,
         props: IConstructProps
     ): Promise<TConstruct>;
 
