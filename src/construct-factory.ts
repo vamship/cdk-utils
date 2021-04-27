@@ -137,7 +137,7 @@ export default abstract class ConstructFactory<
      * @returns A promise that will be resolved after the construct
      *          has been initialized.
      */
-    protected abstract async _init(
+    protected abstract _init(
         scope: Stack | CfnResource,
         props: IConstructProps
     ): Promise<TConstruct>;
