@@ -393,9 +393,8 @@ export default class HttpMethodFactory extends ConstructFactory<Method> {
 
         const responseParameters = Object.keys(this.responseHeaders).reduce(
             (result, header) => {
-                result[
-                    `method.response.header.${header}`
-                ] = this.responseHeaders[header];
+                result[`method.response.header.${header}`] =
+                    this.responseHeaders[header];
                 return result;
             },
             {}

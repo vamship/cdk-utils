@@ -42,9 +42,7 @@ describe('ConstructBuilder', () => {
         return new ConstructBuilder(rootPath);
     }
 
-    function _createFactoryModules(
-        count: number
-    ): Array<{
+    function _createFactoryModules(count: number): Array<{
         construct: MockConstructFactory;
         directory: DirInfo;
     }> {
@@ -470,9 +468,9 @@ describe('ConstructBuilder', () => {
             _loadRecursiveStub.restore();
         });
 
-        function _createScope(
-            stackName = _testValues.getString('stackName')
-        ): { stackName: string } {
+        function _createScope(stackName = _testValues.getString('stackName')): {
+            stackName: string;
+        } {
             return { stackName };
         }
 
