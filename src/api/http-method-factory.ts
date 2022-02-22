@@ -424,7 +424,7 @@ export default class HttpMethodFactory extends ConstructFactory<Method> {
             {
                 statusCode: '403',
                 responseTemplates: RESPONSE_TEMPLATE_ERROR,
-                selectionPattern: '\\[(UnauthorizedError)|(Forbidden.*)\\].*',
+                selectionPattern: '\\[((UnauthorizedError)|(Forbidden.*))\\].*',
                 responseParameters,
             },
             {
