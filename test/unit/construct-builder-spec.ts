@@ -7,7 +7,8 @@ import _chaiAsPromised from 'chai-as-promised';
 _chai.use(_sinonChai);
 _chai.use(_chaiAsPromised);
 
-import { Construct, Stack } from '@aws-cdk/core';
+import { Construct } from 'constructs';
+import { Stack } from 'aws-cdk-lib';
 import {
     asyncHelper as _asyncHelper,
     ObjectMock,

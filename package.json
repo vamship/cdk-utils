@@ -20,34 +20,32 @@
     "author": "Vamshi K Ponnapalli <vamshi.ponnapalli@gmail.com>",
     "license": "MIT",
     "devDependencies": {
-        "@aws-cdk/aws-apigateway": "^1.139.0",
-        "@aws-cdk/aws-iam": "^1.139.0",
-        "@aws-cdk/aws-lambda": "^1.139.0",
-        "@aws-cdk/core": "^1.139.0",
-        "@types/mocha": "^9.0.0",
-        "@types/node": "^17.0.10",
+        "@types/mocha": "^10.0.1",
+        "@types/node": "^18.11.19",
         "@vamship/build-utils": "1.1.0",
         "@vamship/test-utils": "^2.5.8",
-        "aws-sdk": "^2.1059.0",
-        "chai": "^4.3.4",
+        "aws-cdk-lib": "^2.63.2",
+        "aws-sdk": "^2.1310.0",
+        "chai": "^4.3.7",
         "chai-as-promised": "^7.1.1",
+        "constructs": "^10.1.243",
         "rewire": "^6.0.0",
-        "sinon": "^12.0.1",
+        "sinon": "^15.0.1",
         "sinon-chai": "^3.7.0",
-        "typedoc": "^0.22.11"
+        "typedoc": "^0.23.24"
     },
     "dependencies": {
         "@vamship/arg-utils": "^2.4.19",
-        "@vamship/error-types": "^1.7.20",
-        "ajv": "^8.9.0",
-        "bluebird": "^3.7.2"
+        "@vamship/error-types": "^1.8.0",
+        "ajv": "^8.12.0",
+        "aws-cdk-lib": "^2.63.2",
+        "bluebird": "^3.7.2",
+        "constructs": "^10.1.243"
     },
     "peerDependencies": {
-        "@aws-cdk/aws-apigateway": "^1.139.0",
-        "@aws-cdk/aws-iam": "^1.139.0",
-        "@aws-cdk/aws-lambda": "^1.139.0",
-        "@aws-cdk/core": "^1.139.0",
-        "aws-sdk": "^2.1059.0"
+        "aws-cdk-lib": "^2.63.2",
+        "aws-sdk": "^2.1059.0",
+        "constructs": "^10.1.243"
     },
     "repository": {
         "type": "git",

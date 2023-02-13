@@ -1,7 +1,7 @@
 import _fs from 'fs';
 import _path from 'path';
 
-import { Stack } from '@aws-cdk/core';
+import { Stack } from 'aws-cdk-lib';
 
 import { argValidator as _argValidator } from '@vamship/arg-utils';
 import { Promise } from 'bluebird';
