@@ -1,5 +1,6 @@
 import { argValidator as _argValidator } from '@vamship/arg-utils';
-import { IConstruct, Stack, CfnResource } from '@aws-cdk/core';
+import { IConstruct } from 'constructs';
+import { Stack, CfnResource } from 'aws-cdk-lib';
 
 import IConstructProps from './construct-props';
 

@@ -83,10 +83,8 @@ The content of a simple entrypoint file is shown below:
 
 const _path = require('path');
 
-const { App } = require('@aws-cdk/core');
+const { App, Stack } = require('aws-cdk-lib');
 const { ConstructBuilder } = require('@vamship/cdk-utils');
-
-const { Stack } = require('@aws-cdk/core');
 
 // Initialize stacks
 const app = new App();
@@ -116,7 +114,7 @@ The contents of the `users-table.js` file is shown below:
 'use strict';
 
 const { ConstructFactory } = require('@vamship/cdk-utils');
-const _dynamodb = require('@aws-cdk/aws-dynamodb');
+const _dynamodb = require('aws-cdk-lib/aws-dynamodb');
 
 const factory = new ConstructFactory('user-table');
 
@@ -157,7 +155,7 @@ permissions, in the `hello-func.js` file:
 'use strict';
 
 const { ConstructFactory } = require('@vamship/cdk-utils');
-const _lambda = require('@aws-cdk/aws-lambda');
+const _lambda = require('aws-cdk-lib/aws-lambda');
 const _path = require('path');
 
 const userTableConstruct = require('../tables/users-table');
