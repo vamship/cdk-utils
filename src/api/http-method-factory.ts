@@ -21,7 +21,7 @@ import {
 } from 'aws-cdk-lib/aws-apigateway';
 import { Role } from 'aws-cdk-lib/aws-iam';
 import { IFunction } from 'aws-cdk-lib/aws-lambda';
-import { Arn, Stack } from 'aws-cdk-lib';
+import { Arn, ArnFormat, Stack } from 'aws-cdk-lib';
 import { argValidator as _argValidator } from '@vamship/arg-utils';
 import { Promise } from 'bluebird';
 
@@ -590,6 +590,7 @@ export default class HttpMethodFactory extends ConstructFactory<Method> {
                     service: 'lambda',
                     resource: 'function',
                     resourceName: handler,
+                    arnFormat: ArnFormat.COLON_RESOURCE_NAME,
                 },
                 scope as Stack
             );
